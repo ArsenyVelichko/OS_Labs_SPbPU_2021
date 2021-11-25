@@ -1,7 +1,6 @@
 #pragma once
 
 #include <pthread.h>
-#include <atomic>
 #include <list>
 
 #include "Runnable.h"

@@ -1,20 +1,10 @@
 #include <csignal>
-#include <cstring>
-#include <string>
-#include <unistd.h>
-#include <iostream>
 
 #include "HandshakeListener.h"
 
 HandshakeListener::HandshakeListener(int handshakeSignal, int timeout)
 	: m_handshakeSignal(handshakeSignal), m_timeout(timeout) {
 	struct sigaction act = {};
-
-	sigset_t lockMask;
-	sigemptyset(&lockMask);
-	sigaddset(&lockMask, handshakeSignal);
-
-	act.sa_mask = lockMask;
 	act.sa_flags = SA_SIGINFO;
 	act.sa_sigaction = onClientSignal;
 

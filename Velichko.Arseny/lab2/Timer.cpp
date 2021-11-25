@@ -11,12 +11,7 @@ Timer::Timer() {
 	timeoutEvent.sigev_signo = TIMEOUT_SIGNAL;
 	timeoutEvent.sigev_value.sival_ptr = this;
 
-	sigset_t lockMask;
-	sigemptyset(&lockMask);
-	sigaddset(&lockMask, TIMEOUT_SIGNAL);
-
 	struct sigaction timeoutAction = {};
-	timeoutAction.sa_mask = lockMask;
 	timeoutAction.sa_flags = SA_SIGINFO;
 	timeoutAction.sa_sigaction = onTimeout;
 
