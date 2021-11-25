@@ -1,21 +1,29 @@
 #pragma once
 
 #include <queue>
-#include "Singleton.h"
+#include <atomic>
 
-class HandshakeListener : public Singleton<HandshakeListener> {
+#include "Singleton.h"
+#include "Runnable.h"
+
+class HandshakeListener : public Runnable {
 public:
+	//timeout in milliseconds
+	HandshakeListener(int handshakeSignal, int timeout);
+
 	void accept(int id);
 	bool empty() const;
 
-protected:
-	//timeout in seconds
-	HandshakeListener(int handshakeSignal, int timeout);
+	void cancel();
+	void run() override;
 
 private:
-	static void onClientSignal(int signal, siginfo_t* sigInfo, void* context);
+	sigset_t signalSet() const;
+
+	mutable pthread_mutex_t m_mutex;
+	std::atomic_bool m_isCanceled;
 
 	std::queue<int> m_waitingClients;
 	int m_handshakeSignal;
-	int m_timeout;
+	timespec m_timeout;
 };

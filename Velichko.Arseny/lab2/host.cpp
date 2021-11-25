@@ -65,10 +65,10 @@ int main(void) {
 //	if(sigtimedwait(&set, &sigInfo, &timeout) != SIGUSR1) {
 //		perror("Sigwait error");
 //	}
-	HandshakeListener::create(SIGUSR1, 5);
 
 	ThreadPool pool;
 	auto* gameEngine = new GameEngine();
+	pool.start(new HandshakeListener(SIGUSR1, 30000));
 	pool.start(gameEngine);
 
 	//HandshakeListener::instance()->accept(0);

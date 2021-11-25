@@ -17,9 +17,9 @@ public:
 	void stop();
 
 private:
-	static void onTimeout(int signal, siginfo_t* sigInfo, void* context);
+	static void onTimeout(union sigval val);
 
-	static const int TIMEOUT_SIGNAL;
+	pthread_mutex_t m_mutex;
 	timer_t m_id;
 	Callback m_callback;
 };
