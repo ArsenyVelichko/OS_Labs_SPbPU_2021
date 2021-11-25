@@ -3,5 +3,8 @@ project(IPC)
 
 add_definitions(-DSOCKET_NAME="socket")
 
-add_executable(client client.cpp)
-add_executable(host host.cpp)
+file(GLOB SOURCE_FILES *.cpp *.h)
+
+add_executable(host ${SOURCE_FILES})
+target_link_libraries(host librt.so libpthread.so)
+add_subdirectory(client)
