@@ -68,7 +68,7 @@ int main(void) {
 
 	ThreadPool pool;
 	auto* gameEngine = new GameEngine();
-	pool.start(new HandshakeListener(SIGUSR1, 30000));
+	//pool.start(new HandshakeListener(SIGUSR1, 30000));
 	pool.start(gameEngine);
 
 	//HandshakeListener::instance()->accept(0);

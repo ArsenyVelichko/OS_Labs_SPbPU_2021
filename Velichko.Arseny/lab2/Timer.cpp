@@ -30,9 +30,7 @@ void Timer::callOnTimeout(const Timer::Callback& callback) {
 void Timer::start(int interval) {
 	itimerspec timerSpec = {};
 	timerSpec.it_value = TimeUtils::msecToTimespec(interval);
-
-	timerSpec.it_interval.tv_sec = timerSpec.it_value.tv_sec;
-	timerSpec.it_interval.tv_nsec = timerSpec.it_value.tv_nsec;
+	timerSpec.it_interval = timerSpec.it_value;
 
 	timer_settime(m_id, 0, &timerSpec, nullptr);
 }
