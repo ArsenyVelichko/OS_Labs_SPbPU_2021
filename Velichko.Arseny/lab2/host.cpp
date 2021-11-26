@@ -2,8 +2,6 @@
 #include <unistd.h>
 #include <iostream>
 
-#include "HandshakeListener.h"
-#include "Timer.h"
 #include "ThreadPool.h"
 #include "GameEngine.h"
 
@@ -66,11 +64,16 @@ int main(void) {
 //		perror("Sigwait error");
 //	}
 
-	ThreadPool pool;
-	auto* gameEngine = new GameEngine();
-	//pool.start(new HandshakeListener(SIGUSR1, 30000));
-	pool.start(gameEngine);
+	ThreadPool::create();
 
-	//HandshakeListener::instance()->accept(0);
+	sigset_t blockMask;
+	sigemptyset(&blockMask);
+	sigaddset(&blockMask, SIGUSR1);
+
+	ThreadPool::instance()->setBlockMask(&blockMask);
+
+	auto* gameEngine = new GameEngine();
+	ThreadPool::instance()->start(gameEngine);
+
 	return 0;
 }

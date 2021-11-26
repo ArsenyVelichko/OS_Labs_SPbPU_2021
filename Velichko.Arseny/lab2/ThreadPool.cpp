@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <csignal>
 
 #include "ThreadPool.h"
 #include "MutexLocker.h"
@@ -42,4 +43,8 @@ void ThreadPool::removeThread(pthread_t thread) {
 
 ThreadPool::~ThreadPool() {
 	join();
+}
+
+void ThreadPool::setBlockMask(const sigset_t* set) {
+	pthread_sigmask(SIG_BLOCK, set, nullptr);
 }

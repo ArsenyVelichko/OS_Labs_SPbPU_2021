@@ -4,14 +4,18 @@
 #include <list>
 
 #include "Runnable.h"
+#include "Singleton.h"
 
-class ThreadPool {
+class ThreadPool : public Singleton<ThreadPool> {
 public:
-	ThreadPool();
-    ~ThreadPool();
-
 	void start(Runnable* runnable);
 	void join();
+
+	void setBlockMask(const sigset_t* set);
+
+protected:
+	ThreadPool();
+	~ThreadPool();
 
 private:
 	static void* onStartThread(void* arg);

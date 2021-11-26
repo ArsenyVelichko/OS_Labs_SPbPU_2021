@@ -6,10 +6,10 @@
 #include "Singleton.h"
 #include "Runnable.h"
 
-class HandshakeListener : public Runnable {
+class ClientListener : public Runnable {
 public:
 	//timeout in milliseconds
-	HandshakeListener(int handshakeSignal, int timeout);
+	ClientListener(int handshakeSignal, int timeout);
 
 	void accept(int id);
 	bool empty() const;
@@ -17,10 +17,13 @@ public:
 	void cancel();
 	void run() override;
 
+	void waitForClient();
+
 private:
-	sigset_t signalSet() const;
+	void clientArrived();
 
 	mutable pthread_mutex_t m_mutex;
+	pthread_cond_t m_clientArrived;
 	std::atomic_bool m_isCanceled;
 
 	std::queue<int> m_waitingClients;
