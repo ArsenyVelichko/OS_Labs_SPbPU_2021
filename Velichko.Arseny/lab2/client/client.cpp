@@ -7,6 +7,8 @@
 #include <sys/poll.h>
 #include <csignal>
 #include <cstdlib>
+#include <iostream>
+#include "../Connections/Connection.h"
 
 int main(int argc, char** argv) {
 //	int socketHandler = socket(PF_UNIX, SOCK_STREAM, 0);
@@ -41,9 +43,9 @@ int main(int argc, char** argv) {
 //	size_t writed = write(fd, "Loh", 4);
 //	sleep(20);
 //	close(fd);
-	sigval pid = {};
-	pid.sival_int = getpid();
-	int hostPid = atoi(argv[1]);
-	sigqueue(hostPid, SIGUSR1, pid);
+	auto conn = new Connection(0, false);
+	if (conn->write("Loh", 4) == -1) {
+		perror("");
+	}
 	return 0;
 }
