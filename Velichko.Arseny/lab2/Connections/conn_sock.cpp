@@ -4,7 +4,6 @@
 
 #include "conn_sock.h"
 
-
 ConnectionImpl::ConnectionImpl(int id, bool create) :
 		m_id(id), m_socket(new UdpSocket),
 		m_sendAddr(std::string(HOST_ADDR_NAME) + std::to_string(id)) {
@@ -31,10 +30,6 @@ ConnectionImpl::~ConnectionImpl() {
 
 ConnectionImpl::UdpSocket::UdpSocket() {
 	m_socketFd = socket(PF_UNIX, SOCK_DGRAM, 0);
-}
-
-int ConnectionImpl::UdpSocket::descriptor() const {
-	return m_socketFd;
 }
 
 int ConnectionImpl::UdpSocket::bind(const UnixHostAddress& address) {

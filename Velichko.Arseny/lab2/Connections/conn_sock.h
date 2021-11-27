@@ -31,9 +31,7 @@ private:
 	public:
 		explicit UdpSocket();
 
-		int descriptor() const;
 		int bind(const UnixHostAddress& address);
-
 		int pollDatagram(int timeout) const;
 
 		ssize_t writeDatagram(const char* data, size_t size, const UnixHostAddress& address);
