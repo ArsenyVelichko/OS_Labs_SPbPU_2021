@@ -7,10 +7,7 @@
 ClientListener::ClientListener(int handshakeSignal, int timeout) :
 	m_isCanceled(false),
 	m_handshakeSignal(handshakeSignal),
-    m_timeout(TimeUtils::msecToTimespec(timeout)) {
-
-	pthread_mutex_init(&m_mutex, nullptr);
-}
+    m_timeout(TimeUtils::msecToTimespec(timeout)) {}
 
 void ClientListener::accept(int id) {
 	MutexLocker locker(&m_mutex);

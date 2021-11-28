@@ -4,10 +4,6 @@
 #include "ThreadPool.h"
 #include "MutexLocker.h"
 
-ThreadPool::ThreadPool() {
-	pthread_mutex_init(&m_mutex, nullptr);
-}
-
 void* ThreadPool::onStartThread(void* arg) {
 	auto runnableInfo = reinterpret_cast<RunnableInfo*>(arg);
 	Runnable* runnable = runnableInfo->runnable;

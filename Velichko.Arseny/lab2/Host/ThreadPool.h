@@ -14,7 +14,7 @@ public:
 	void setBlockMask(const sigset_t* set);
 
 protected:
-	ThreadPool();
+	ThreadPool() = default;
 	~ThreadPool();
 
 private:
@@ -27,6 +27,6 @@ private:
 		Runnable* runnable;
 	};
 
-	pthread_mutex_t m_mutex;
+	pthread_mutex_t m_mutex = PTHREAD_MUTEX_INITIALIZER;
 	std::list<pthread_t> m_threads;
 };

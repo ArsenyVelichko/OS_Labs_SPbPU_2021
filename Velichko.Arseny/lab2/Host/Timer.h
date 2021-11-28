@@ -19,7 +19,7 @@ public:
 private:
 	static void onTimeout(union sigval val);
 
-	pthread_mutex_t m_mutex;
+	pthread_mutex_t m_mutex = PTHREAD_MUTEX_INITIALIZER;
 	timer_t m_id;
 	Callback m_callback;
 };

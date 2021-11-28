@@ -3,12 +3,12 @@
 #include "GameEngine.h"
 #include "MutexLocker.h"
 #include "ThreadPool.h"
+#include "Player.h"
 
 GameEngine::GameEngine() :
-	m_gameTimer(new Timer) {
-
-	pthread_mutex_init(&m_mutex, nullptr);
-	pthread_cond_init(&m_canMakeTurn, nullptr);
+	m_gameTimer(new Timer),
+	m_controlBlock(new GameControlBlock),
+	m_randGenerator(new RandGenerator(0, 100)) {
 
 	auto makeTurnCallback = [this] () {
 		makeTurn();
@@ -21,14 +21,30 @@ void GameEngine::run() {
 	auto clientListener = new ClientListener(SIGUSR1, 5000);
 
 	threadPool->start(clientListener);
-	clientListener->waitForClient();
+	//clientListener->waitForClient();
 
-	m_gameTimer->start(1000);
-	for (int i = 0; i < 5; i++) {
+	int turnsWithoutAlive = 0;
+	int playerId = 0;
+
+	m_gameTimer->start(500);
+	while (turnsWithoutAlive < 2) {
+		//while (!clientListener->empty()) {
+			threadPool->start(new Player(playerId, m_controlBlock));
+			playerId++;
+		//	clientListener->accept(0);
+		//}
+
+		m_controlBlock->setGameValue(m_randGenerator->generate());
 		waitTurn();
-		std::cout << i << std::endl;
+
+		if (m_controlBlock->aliveCount() == 0) {
+			turnsWithoutAlive++;
+		} else {
+			turnsWithoutAlive = 0;
+		}
 	}
 
+	m_controlBlock->setGameValue(END_GAME_VALUE);
 	clientListener->cancel();
 }
 
@@ -39,6 +55,7 @@ void GameEngine::makeTurn() {
 
 GameEngine::~GameEngine() {
 	delete m_gameTimer;
+	delete m_randGenerator;
 }
 
 void GameEngine::waitTurn() {

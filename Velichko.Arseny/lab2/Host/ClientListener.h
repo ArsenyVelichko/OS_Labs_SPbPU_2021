@@ -22,8 +22,8 @@ public:
 private:
 	void clientArrived();
 
-	mutable pthread_mutex_t m_mutex;
-	pthread_cond_t m_clientArrived;
+	mutable pthread_mutex_t m_mutex = PTHREAD_MUTEX_INITIALIZER;
+	pthread_cond_t m_clientArrived = PTHREAD_COND_INITIALIZER;
 	std::atomic_bool m_isCanceled;
 
 	std::queue<int> m_waitingClients;

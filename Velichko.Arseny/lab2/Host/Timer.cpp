@@ -6,8 +6,6 @@
 #include "TimeUtils.h"
 
 Timer::Timer() {
-	pthread_mutex_init(&m_mutex, nullptr);
-
 	sigevent timeoutEvent = {};
 	timeoutEvent.sigev_notify = SIGEV_THREAD;
 	timeoutEvent.sigev_notify_function = onTimeout;
