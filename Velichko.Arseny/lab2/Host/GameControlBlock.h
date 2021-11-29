@@ -16,13 +16,11 @@ public:
 	uint32_t playersCount() const;
 
 	void setGameValue(int value);
-	int takeGameValue();
+	int waitGameValue();
 
 	void waitAllPlayers();
 
 private:
-	void checkForAllReady();
-
 	pthread_mutex_t m_mutex = PTHREAD_MUTEX_INITIALIZER;
 	pthread_cond_t m_gameValueFetched = PTHREAD_COND_INITIALIZER;
 	pthread_cond_t m_allPlayersReady = PTHREAD_COND_INITIALIZER;

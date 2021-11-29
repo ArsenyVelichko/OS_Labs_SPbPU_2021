@@ -11,7 +11,7 @@ void HostPlayer::run() {
 
 	while (true) {
 		try {
-			int gameValue = m_controlBlock->takeGameValue();
+			int gameValue = m_controlBlock->waitGameValue();
 			log_info("Read started");
 			if (gameValue == EndGameValue) {
 				writeAnswer(EndGameValue);

@@ -8,7 +8,7 @@ void GameControlBlock::setGameValue(int value) {
 	pthread_cond_broadcast(&m_gameValueFetched);
 }
 
-int GameControlBlock::takeGameValue() {
+int GameControlBlock::waitGameValue() {
 	MutexLocker locker(&m_mutex);
 	m_playersReady++;
 
