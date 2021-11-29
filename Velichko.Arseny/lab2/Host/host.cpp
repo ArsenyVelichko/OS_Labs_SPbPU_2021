@@ -2,8 +2,10 @@
 #include <unistd.h>
 #include <iostream>
 
+#include "Logger.h"
 #include "ThreadPool.h"
 #include "GameEngine.h"
+#include "../Connections/Connection.h"
 
 int main(void) {
 //	const char* name = "pipe";
@@ -35,20 +37,8 @@ int main(void) {
 //		perror("Sigwait error");
 //	}
 
-	ThreadPool::create();
-
-	sigset_t blockMask;
-	sigemptyset(&blockMask);
-	sigaddset(&blockMask, SIGUSR1);
-
-	ThreadPool::instance()->setBlockMask(&blockMask);
-
-	auto* gameEngine = new GameEngine();
-	ThreadPool::instance()->start(gameEngine);
-
-//	char buf[1024] = {};
-//	auto conn = new Connection(0, true);
-//	conn->read(buf, sizeof(buf));
-//	std::cout << buf << std::endl;
+	Logger::create();
+	auto gameEngine = std::make_unique<GameEngine>();
+	gameEngine->exec();
 	return 0;
 }

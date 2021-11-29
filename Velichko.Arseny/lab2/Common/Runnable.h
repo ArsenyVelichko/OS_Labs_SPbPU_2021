@@ -1,5 +1,7 @@
 #pragma once
 
+#include <atomic>
+
 class Runnable {
 public:
 	virtual void run() = 0;
@@ -9,5 +11,5 @@ public:
 	void setAutoDelete(bool autoDelete);
 
 private:
-	bool m_autoDelete = true;
+	std::atomic_bool m_autoDelete = true;
 };

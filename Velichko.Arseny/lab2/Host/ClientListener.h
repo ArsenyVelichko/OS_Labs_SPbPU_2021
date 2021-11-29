@@ -20,7 +20,7 @@ public:
 	void waitForClient();
 
 private:
-	void clientArrived();
+	void appendClient(int pid);
 
 	mutable pthread_mutex_t m_mutex = PTHREAD_MUTEX_INITIALIZER;
 	pthread_cond_t m_clientArrived = PTHREAD_COND_INITIALIZER;

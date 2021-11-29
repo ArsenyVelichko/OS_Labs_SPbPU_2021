@@ -3,23 +3,23 @@
 #include <memory>
 #include <cstdio>
 
-class ConnectionImpl;
+class ConnectionPrivate;
 
 class Connection {
 public:
-	Connection(int id, bool create);
+	Connection(int id, int timeout, bool create);
 	~Connection();
 
 	int id() const;
+	int timeout() const;
 
 	ssize_t read(char* data, size_t size);
 	ssize_t write(const char* data, size_t size);
 
 private:
 	//Constant propagation
-	const ConnectionImpl* pImpl() const;
-	ConnectionImpl* pImpl();
+	const ConnectionPrivate* pImpl() const;
+	ConnectionPrivate* pImpl();
 
-	std::unique_ptr<ConnectionImpl> m_pImpl;
-	int m_id;
+	std::unique_ptr<ConnectionPrivate> m_pImpl;
 };

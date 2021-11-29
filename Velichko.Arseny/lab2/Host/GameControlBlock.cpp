@@ -3,32 +3,53 @@
 
 void GameControlBlock::setGameValue(int value) {
 	MutexLocker locker(&m_mutex);
+	m_aliveCount = 0;
 	m_gameValue = value;
-
-	for (auto& pair : m_fetchedIds) {
-		pair.second = true;
-	}
 	pthread_cond_broadcast(&m_gameValueFetched);
 }
 
-int GameControlBlock::takeGameValue(int id) {
+int GameControlBlock::takeGameValue() {
 	MutexLocker locker(&m_mutex);
+	m_playersReady++;
 
-	if (m_fetchedIds.find(id) == m_fetchedIds.end()) {
-		m_fetchedIds[id] = true;
+	if (m_playersReady == m_playersCount) {
+		pthread_cond_signal(&m_allPlayersReady);
 	}
-
-	if (!m_fetchedIds[id]) {
-		pthread_cond_wait(&m_gameValueFetched, &m_mutex);
-	}
-	m_fetchedIds[id] = false;
+	pthread_cond_wait(&m_gameValueFetched, &m_mutex);
 	return m_gameValue;
 }
 
-void GameControlBlock::incAliveCount() {
+void GameControlBlock::playerJoined() {
+	m_playersCount++;
+}
+
+void GameControlBlock::playerSurvived() {
 	m_aliveCount++;
 }
 
+void GameControlBlock::playerLeft() {
+	MutexLocker locker(&m_mutex);
+	m_playersCount--;
+
+	if (m_playersReady == m_playersCount) {
+		pthread_cond_signal(&m_allPlayersReady);
+	}
+}
+
+
 uint32_t GameControlBlock::aliveCount() const {
 	return m_aliveCount;
+}
+
+uint32_t GameControlBlock::playersCount() const {
+	return m_playersCount;
+}
+
+void GameControlBlock::waitAllPlayers() {
+	MutexLocker locker(&m_mutex);
+
+	if (m_playersCount != m_playersReady) {
+		pthread_cond_wait(&m_allPlayersReady, &m_mutex);
+	}
+	m_playersReady = 0;
 }

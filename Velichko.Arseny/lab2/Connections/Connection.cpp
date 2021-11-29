@@ -1,14 +1,14 @@
 #include "Connection.h"
 #include CONN_IMPL_HEADER
 
-Connection::Connection(int id, bool create)
-	: m_id(id), m_pImpl(new ConnectionImpl(id, create)) {}
+Connection::Connection(int id, int timeout, bool create)
+	: m_pImpl(new ConnectionPrivate(id, timeout, create)) {}
 
-const ConnectionImpl* Connection::pImpl() const {
+const ConnectionPrivate* Connection::pImpl() const {
 	return m_pImpl.get();
 }
 
-ConnectionImpl* Connection::pImpl() {
+ConnectionPrivate* Connection::pImpl() {
 	return m_pImpl.get();
 }
 
@@ -21,7 +21,11 @@ ssize_t Connection::write(const char* data, size_t size) {
 }
 
 int Connection::id() const {
-	return m_id;
+	return m_pImpl->id();
+}
+
+int Connection::timeout() const {
+	return m_pImpl->timeout();
 }
 
 Connection::~Connection() = default;

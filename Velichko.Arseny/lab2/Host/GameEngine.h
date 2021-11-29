@@ -1,28 +1,31 @@
 #pragma once
 
+#include "ThreadPool.h"
 #include "Runnable.h"
 #include "Timer.h"
 #include "ClientListener.h"
 #include "GameControlBlock.h"
 #include "RandGenerator.h"
 
-class GameEngine : public Runnable {
+class GameEngine {
 public:
 	GameEngine();
-	~GameEngine() override;
+	~GameEngine();
 
-	void run() override;
-
-	static constexpr int END_GAME_VALUE = -1;
+	void exec();
 
 private:
-	int gameValue() const;
+	void acceptClients();
 
 	void makeTurn();
 	void waitTurn();
 
+	int m_playerId;
 	Timer* m_gameTimer;
 	SharedControlBlock m_controlBlock;
+	ThreadPool* m_gameThreadPool;
+
+	ClientListener* m_clientListener;
 	RandGenerator* m_randGenerator;
 
 	pthread_mutex_t m_mutex = PTHREAD_MUTEX_INITIALIZER;

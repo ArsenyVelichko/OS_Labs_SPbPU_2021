@@ -3,6 +3,7 @@
 
 #include "ThreadPool.h"
 #include "MutexLocker.h"
+#include "Logger.h"
 
 void* ThreadPool::onStartThread(void* arg) {
 	auto runnableInfo = reinterpret_cast<RunnableInfo*>(arg);
@@ -22,7 +23,11 @@ void* ThreadPool::onStartThread(void* arg) {
 void ThreadPool::start(Runnable* runnable) {
 	pthread_t thread;
 	auto info = new RunnableInfo{ this, runnable };
-	pthread_create(&thread, nullptr, onStartThread, info);
+	if (pthread_create(&thread, nullptr, onStartThread, info) != 0) {
+		log_error("Pthread create failed");
+		return;
+	}
+
 	m_threads.push_back(thread);
 }
 
@@ -33,12 +38,7 @@ void ThreadPool::join() {
 }
 
 void ThreadPool::removeThread(pthread_t thread) {
-	MutexLocker locker(&m_mutex);
 	std::remove(m_threads.begin(), m_threads.end(), thread);
-}
-
-ThreadPool::~ThreadPool() {
-	join();
 }
 
 void ThreadPool::setBlockMask(const sigset_t* set) {

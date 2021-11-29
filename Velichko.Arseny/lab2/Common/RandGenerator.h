@@ -7,6 +7,7 @@ public:
 	RandGenerator(int a, int b);
 	RandGenerator(int a, int b, unsigned int seed);
 
+	void setRange(int a, int b);
 	int generate();
 
 private:
