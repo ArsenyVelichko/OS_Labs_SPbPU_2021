@@ -12,6 +12,7 @@ public:
 
 private:
 	void writeClientValue(int value);
+	void updateStatus(Status newStatus);
 	char readAnswer();
 
 	int m_clientValue;

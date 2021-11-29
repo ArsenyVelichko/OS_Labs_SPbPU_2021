@@ -15,7 +15,7 @@ void ClientPlayer::run() {
 
 			char answer = readAnswer();
 			if (answer == Player::EndGameValue) { break; }
-			setStatus(static_cast<Status>(answer));
+			updateStatus(static_cast<Status>(answer));
 
 		} catch (std::exception& e) {
 			log_error(e.what());
@@ -32,13 +32,22 @@ void ClientPlayer::writeClientValue(int value) {
 	}
 }
 
+void ClientPlayer::updateStatus(Status newStatus) {
+	static std::vector<int> valueUpperBound = { 50, 100 };
+
+	if (status() != newStatus) {
+		m_randGenerator->setRange(0, valueUpperBound[newStatus]);
+		setStatus(newStatus);
+	}
+}
+
 char ClientPlayer::readAnswer() {
 	size_t size = 1;
-	char data[size];
+	char answer;
 
-	if (conn()->read(data, size) != size) {
+	if (conn()->read(&answer, size) < size) {
 		throw std::runtime_error("Invalid read");
 	}
-	log_info("Status: " + std::to_string(static_cast<Status>(data[0])));
-	return data[0];
+	log_info("Status: " + std::to_string(static_cast<Status>(answer)));
+	return answer;
 }

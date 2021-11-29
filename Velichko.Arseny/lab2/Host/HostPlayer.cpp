@@ -50,8 +50,7 @@ int HostPlayer::readClientValue() {
 
 void HostPlayer::writeAnswer(char answer) {
 	size_t size = 1;
-
-	if (conn()->write(&answer, size) != size) {
+	if (conn()->write(&answer, size) < size) {
 		throw std::runtime_error("Invalid write");
 	}
 }
