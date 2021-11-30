@@ -2,7 +2,7 @@
 #include <Logger.h>
 #include "HostPlayer.h"
 #include "GameEngine.h"
-#include "ByteArray.h"
+#include "Serialization.h"
 
 HostPlayer::HostPlayer(int id, const SharedControlBlock& controlBlock) :
 	Player(id, 10000, true), m_controlBlock(controlBlock) {}
@@ -45,7 +45,7 @@ int HostPlayer::readClientValue() {
 	if (conn()->read(data, size) != size) {
 		throw std::runtime_error("Invalid read");
 	}
-	return ByteArray(data, size).toInt();
+	return Serialization::parse(data);
 }
 
 void HostPlayer::writeAnswer(char answer) {

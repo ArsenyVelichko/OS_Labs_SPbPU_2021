@@ -21,5 +21,7 @@ private:
 	const ConnectionPrivate* pImpl() const;
 	ConnectionPrivate* pImpl();
 
+	int m_id;
+	int m_timeout;
 	std::unique_ptr<ConnectionPrivate> m_pImpl;
 };

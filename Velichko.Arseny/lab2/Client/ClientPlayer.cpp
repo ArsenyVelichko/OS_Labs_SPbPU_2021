@@ -1,7 +1,7 @@
 #include <stdexcept>
 
 #include "ClientPlayer.h"
-#include "ByteArray.h"
+#include "Serialization.h"
 #include "Logger.h"
 
 ClientPlayer::ClientPlayer(int id) :
@@ -25,9 +25,11 @@ void ClientPlayer::run() {
 }
 
 void ClientPlayer::writeClientValue(int value) {
-	ByteArray ba = ByteArray::fromInt(value);
+	size_t size = sizeof(int);
+	char data[size];
 
-	if (conn()->write(ba.constData(), ba.size()) != ba.size()) {
+	Serialization::serialize(data, value);
+	if (conn()->write(data, size) < size) {
 		throw std::runtime_error("Invalid write");
 	}
 }

@@ -3,7 +3,9 @@
 #include <vector>
 #include <string_view>
 #include <string>
-#include <pthread.h>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 #include "Singleton.h"
 
@@ -33,7 +35,8 @@ private:
 	std::vector<std::string_view> m_levelNames;
 };
 
-#define log_macro(level, msg) Logger::instance()->log(level, msg, __FILE__, __FUNCTION__, __LINE__)
+#define log_macro(level, msg) \
+	Logger::instance()->log(level, msg, fs::relative(__FILE__, PROJECT_DIR), __FUNCTION__, __LINE__)
 
 #ifndef NDEBUG
 #define log_debug(msg) log_macro(Logger::Level_Debug, msg)

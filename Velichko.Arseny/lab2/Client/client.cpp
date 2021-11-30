@@ -5,6 +5,10 @@
 #include <sstream>
 #include <csignal>
 #include <unistd.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <poll.h>
+#include <sys/poll.h>
 
 #include "../Connections/Connection.h"
 #include "ThreadPool.h"
@@ -17,7 +21,10 @@ int main(int argc, char** argv) {
 //
 //	int fd = open(name, O_RDWR | O_NONBLOCK);
 //	size_t writed = write(fd, "Loh", 4);
-//	sleep(20);
+//	pollfd pollHandler = { fd, 0 };
+//	//poll(&pollHandler, 1, -1);
+//
+//
 //	close(fd);
 
 	Logger::create();
@@ -53,11 +60,6 @@ int main(int argc, char** argv) {
 
 	threadPool->start(new ClientPlayer(id));
 	threadPool->join();
-//	auto conn = new Connection(0, false);
-//	char data[sizeof(int)];
-//	*(int*)data = 1293;
-//	conn->write(data, sizeof(data));
-//	log_info(std::to_string(*(int*)data));
 
 	return 0;
 }

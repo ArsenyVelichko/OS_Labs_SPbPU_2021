@@ -35,7 +35,7 @@ void GameEngine::exec() {
 	m_playerId = 0;
 	m_gameTimer->start(1000);
 
-	while (turnsWithoutAlive < 5) {
+	while (turnsWithoutAlive < 2) {
 		log_info("Turn started");
 		acceptClients();
 		m_controlBlock->waitAllPlayers();

@@ -27,9 +27,11 @@ std::string_view Logger::getLevelName(Level level) {
 
 void Logger::log(Level level, const std::string& message,
 				 const std::string& file, const std::string& function, int line) {
+	//Concatenate msg for correct multithreaded output
+	std::ostringstream completeMsg;
+	completeMsg << "[" << getLevelName(level) << ": "
+				<< file << ", " << function << ", " << line << "] "
+				<< message << '\n';
 
-	*m_os << getLevelName(level) << ": " << message << '\n'
-		  << "File: " << file << '\n'
-		  << "Function: " << function << '\n'
-		  << "Line: " << line << '\n';
+	*m_os << completeMsg.str();
 };

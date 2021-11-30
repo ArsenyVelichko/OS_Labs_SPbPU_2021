@@ -1,12 +1,12 @@
 #pragma once
 
-#include <cstddef>
 #include <string_view>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <memory>
 
 #include "Connection.h"
+#include "IODevice.h"
 
 class UnixHostAddress {
 public:
@@ -25,39 +25,35 @@ private:
 	std::shared_ptr<sockaddr_un> m_socketAddr;
 };
 
-class UdpSocket {
+class UdpSocket : public IODevice {
 public:
 	UdpSocket();
 
-	int bind(const UnixHostAddress& address);
-	int pollDatagram(int timeout) const;
+	void setHost(const UnixHostAddress& address);
 
-	ssize_t writeDatagram(const char* data, size_t size, const UnixHostAddress& address);
-	ssize_t readDatagram(char* data, size_t size);
+	int bind(const UnixHostAddress& address);
+	int waitForReadyRead(int timeout) override;
+
+	ssize_t write(const char* data, size_t size) override;
+	ssize_t read(char* data, size_t size) override;
 
 private:
 	int m_socketFd;
+	UnixHostAddress m_hostAddress;
 };
 
 class ConnectionPrivate {
 public:
-	ConnectionPrivate(int id, int timeout, bool create);
+	ConnectionPrivate(Connection* conn, bool create);
 	~ConnectionPrivate();
 
 	ssize_t read(char* data, size_t size);
 	ssize_t write(const char* data, size_t size);
 
-	int id() const;
-	int timeout() const;
-
 private:
-	static constexpr std::string_view HOST_ADDR_NAME = "host";
-	static constexpr std::string_view CLIENT_ADDR_NAME = "Client";
+	static constexpr std::string_view HOST_ADDR_PREFIX = "sock_host_";
+	static constexpr std::string_view CLIENT_ADDR_PREFIX = "sock_client_";
 
-	int m_id;
-	int m_timeout;
-
+	Connection* m_conn;
 	UdpSocket* m_socket;
-	UnixHostAddress m_sendAddr;
-	UnixHostAddress m_receiveAddr;
 };

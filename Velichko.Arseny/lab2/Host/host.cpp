@@ -1,6 +1,8 @@
 #include <csignal>
 #include <unistd.h>
 #include <iostream>
+#include <poll.h>
+#include <fcntl.h>
 
 #include "Logger.h"
 #include "ThreadPool.h"
@@ -10,7 +12,7 @@
 int main(void) {
 //	const char* name = "pipe";
 //
-//	int fd = open(name, O_RDONLY | O_NONBLOCK);
+//	int fd = open(name, O_RDWR | O_NONBLOCK);
 //	struct pollfd pollfds[] = {
 //			{fd, POLLIN, 0},
 //	};
@@ -25,17 +27,7 @@ int main(void) {
 //	if (pollfds->revents & POLLHUP) {
 //		printf("Poll hup \n");
 //	}
-
-//	sigset_t set;
-//	sigemptyset(&set);
-//	sigaddset(&set, SIGUSR1);
-//	siginfo_t sigInfo;
-//	timespec timeout = { 30 };
-//	sigprocmask( SIG_BLOCK, &set, NULL );
-//
-//	if(sigtimedwait(&set, &sigInfo, &timeout) != SIGUSR1) {
-//		perror("Sigwait error");
-//	}
+//	close(fd);
 
 	Logger::create();
 	auto gameEngine = std::make_unique<GameEngine>();
