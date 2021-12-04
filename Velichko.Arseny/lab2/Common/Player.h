@@ -2,8 +2,8 @@
 
 #include <atomic>
 
-#include "Runnable.h"
-#include "../Connections/Connection.h"
+#include "Connection.h"
+#include "MultiThreading/Runnable.h"
 
 class Player : public Runnable {
 public:
@@ -16,7 +16,7 @@ public:
 	};
 
 	//Value to inform player, that game has been ended
-	static constexpr int EndGameValue = -1;
+	static constexpr char EndGameValue = -1;
 
 	int id() const;
 	Status status() const;

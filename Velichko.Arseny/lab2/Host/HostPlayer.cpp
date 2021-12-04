@@ -1,7 +1,8 @@
-#include <iostream>
 #include <Logger.h>
+
 #include "HostPlayer.h"
 #include "GameEngine.h"
+
 #include "Serialization.h"
 
 HostPlayer::HostPlayer(int id, const SharedControlBlock& controlBlock) :
@@ -45,7 +46,7 @@ int HostPlayer::readClientValue() {
 	if (conn()->read(data, size) != size) {
 		throw std::runtime_error("Invalid read");
 	}
-	return Serialization::parse(data);
+	return Serialization::parse<int>(data);
 }
 
 void HostPlayer::writeAnswer(char answer) {

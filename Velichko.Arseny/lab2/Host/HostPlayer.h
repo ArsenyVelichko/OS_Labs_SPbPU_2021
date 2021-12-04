@@ -1,9 +1,7 @@
 #pragma once
 
-#include "Runnable.h"
 #include "GameControlBlock.h"
 #include "Player.h"
-#include "../Connections/Connection.h"
 
 class HostPlayer : public Player {
 public:

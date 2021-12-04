@@ -2,7 +2,7 @@
 
 #include "Player.h"
 #include "RandGenerator.h"
-#include "../Connections/Connection.h"
+#include "Connection.h"
 
 class ClientPlayer : public Player {
 public:
@@ -15,6 +15,5 @@ private:
 	void updateStatus(Status newStatus);
 	char readAnswer();
 
-	int m_clientValue;
 	RandGenerator* m_randGenerator;
 };

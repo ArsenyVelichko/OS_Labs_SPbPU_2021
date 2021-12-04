@@ -1,17 +1,7 @@
-#include <sys/socket.h>
-#include <cstdio>
-
-#include <iostream>
-#include <sstream>
 #include <csignal>
 #include <unistd.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <poll.h>
-#include <sys/poll.h>
 
-#include "../Connections/Connection.h"
-#include "ThreadPool.h"
+#include "MultiThreading/ThreadPool.h"
 #include "Logger.h"
 #include "ClientPlayer.h"
 
@@ -41,17 +31,15 @@ int main(int argc, char** argv) {
 	val.sival_int = getpid();
 	sigqueue(hostPid, SIGUSR1, val);
 
-	sigset_t sigSet;
-	sigemptyset(&sigSet);
-	sigaddset(&sigSet, SIGUSR1);
+	auto siSet = SignalUtils::createSiSet({ SIGUSR1 });
 
 	auto threadPool = new ThreadPool;
-	threadPool->setBlockMask(&sigSet);
+	ThreadPool::setBlockMask(siSet);
 
 	siginfo_t sigInfo;
 	timespec timeout = {};
 	timeout.tv_sec = 5;
-	if (sigtimedwait(&sigSet, &sigInfo, &timeout) == -1) {
+	if (sigtimedwait(siSet.get(), &sigInfo, &timeout) == -1) {
 		log_error("No signal");
 		return EXIT_FAILURE;
 	}

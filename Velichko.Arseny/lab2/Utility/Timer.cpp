@@ -2,7 +2,7 @@
 #include <pthread.h>
 
 #include "Timer.h"
-#include "MutexLocker.h"
+#include "MultiThreading/MutexLocker.h"
 #include "TimeUtils.h"
 
 Timer::Timer() {

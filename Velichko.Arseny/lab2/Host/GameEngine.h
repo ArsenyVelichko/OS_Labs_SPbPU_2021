@@ -1,11 +1,14 @@
 #pragma once
 
-#include "ThreadPool.h"
-#include "Runnable.h"
-#include "Timer.h"
-#include "ClientListener.h"
-#include "GameControlBlock.h"
+#include "MultiThreading/ThreadPool.h"
+#include "MultiThreading/Runnable.h"
+#include "Signals/SignalListener.h"
 #include "RandGenerator.h"
+#include "Timer.h"
+
+#include "GameControlBlock.h"
+
+using SignalUtils::SharedSiInfo;
 
 class GameEngine {
 public:
@@ -15,7 +18,8 @@ public:
 	void exec();
 
 private:
-	void acceptClients();
+	void processSignals();
+	int addPlayer();
 
 	void makeTurn();
 	void waitTurn();
@@ -25,7 +29,7 @@ private:
 	SharedControlBlock m_controlBlock;
 	ThreadPool* m_gameThreadPool;
 
-	ClientListener* m_clientListener;
+	SignalListener* m_signalListener;
 	RandGenerator* m_randGenerator;
 
 	pthread_mutex_t m_mutex = PTHREAD_MUTEX_INITIALIZER;

@@ -2,32 +2,35 @@
 
 #include <memory>
 #include <pthread.h>
-#include <semaphore.h>
 #include <atomic>
-#include <map>
+
+#include "MultiThreading/Semaphore.h"
 
 class GameControlBlock {
 public:
+	//Game engine interface
+	GameControlBlock();
+	~GameControlBlock();
+
 	void playerJoined();
-	void playerSurvived();
-	void playerLeft();
+	void waitAllPlayers();
+	void setGameValue(int value);
 
 	uint32_t aliveCount() const;
 	uint32_t playersCount() const;
 
-	void setGameValue(int value);
+	//Player interface
+	void playerSurvived();
+	void playerLeft();
 	int waitGameValue();
-
-	void waitAllPlayers();
 
 private:
 	pthread_mutex_t m_mutex = PTHREAD_MUTEX_INITIALIZER;
 	pthread_cond_t m_gameValueFetched = PTHREAD_COND_INITIALIZER;
-	pthread_cond_t m_allPlayersReady = PTHREAD_COND_INITIALIZER;
+	Semaphore* m_sem;
 
 	int m_gameValue;
 	std::atomic_uint32_t m_playersCount = 0;
-	std::atomic_uint32_t m_playersReady = 0;
 	std::atomic_uint32_t m_aliveCount = 0;
 };
 

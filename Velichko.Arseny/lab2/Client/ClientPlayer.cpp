@@ -18,7 +18,6 @@ void ClientPlayer::run() {
 			updateStatus(static_cast<Status>(answer));
 
 		} catch (std::exception& e) {
-			log_error(e.what());
 			break;
 		}
 	}

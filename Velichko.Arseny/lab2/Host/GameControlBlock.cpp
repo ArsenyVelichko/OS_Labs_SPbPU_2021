@@ -1,5 +1,5 @@
 #include "GameControlBlock.h"
-#include "MutexLocker.h"
+#include "MultiThreading/MutexLocker.h"
 
 void GameControlBlock::setGameValue(int value) {
 	MutexLocker locker(&m_mutex);
@@ -10,11 +10,8 @@ void GameControlBlock::setGameValue(int value) {
 
 int GameControlBlock::waitGameValue() {
 	MutexLocker locker(&m_mutex);
-	m_playersReady++;
 
-	if (m_playersReady == m_playersCount) {
-		pthread_cond_signal(&m_allPlayersReady);
-	}
+	m_sem->release();
 	pthread_cond_wait(&m_gameValueFetched, &m_mutex);
 	return m_gameValue;
 }
@@ -28,12 +25,8 @@ void GameControlBlock::playerSurvived() {
 }
 
 void GameControlBlock::playerLeft() {
-	MutexLocker locker(&m_mutex);
+	m_sem->release();
 	m_playersCount--;
-
-	if (m_playersReady == m_playersCount) {
-		pthread_cond_signal(&m_allPlayersReady);
-	}
 }
 
 
@@ -46,10 +39,11 @@ uint32_t GameControlBlock::playersCount() const {
 }
 
 void GameControlBlock::waitAllPlayers() {
-	MutexLocker locker(&m_mutex);
+	m_sem->acquire(m_playersCount);
+}
 
-	if (m_playersCount != m_playersReady) {
-		pthread_cond_wait(&m_allPlayersReady, &m_mutex);
-	}
-	m_playersReady = 0;
+GameControlBlock::GameControlBlock() : m_sem(new Semaphore) {}
+
+GameControlBlock::~GameControlBlock() {
+	delete m_sem;
 }

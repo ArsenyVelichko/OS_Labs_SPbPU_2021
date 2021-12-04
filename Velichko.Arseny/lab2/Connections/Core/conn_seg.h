@@ -3,9 +3,6 @@
 #include "Connection.h"
 #include "IODevice.h"
 
-
-
-
 class ConnectionPrivate {
 public:
 	ConnectionPrivate(Connection* conn, bool create);
