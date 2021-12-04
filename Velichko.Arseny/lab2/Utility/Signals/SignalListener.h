@@ -20,11 +20,13 @@ public:
 	void cancel();
 	void run() override;
 
-	void waitForClient();
+	void waitForSignal();
 
 private:
+	void addSignal(const SharedSiInfo& siInfo);
+
 	mutable pthread_mutex_t m_mutex = PTHREAD_MUTEX_INITIALIZER;
-	pthread_cond_t m_clientArrived = PTHREAD_COND_INITIALIZER;
+	pthread_cond_t m_clientNewSignal = PTHREAD_COND_INITIALIZER;
 	std::atomic_bool m_isCanceled = false;
 
 	SharedSiSet m_signalSet;

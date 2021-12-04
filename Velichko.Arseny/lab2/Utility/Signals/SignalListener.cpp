@@ -27,8 +27,7 @@ void SignalListener::run() {
 			continue;
 		}
 
-		MutexLocker locker(&m_mutex);
-		m_waitingSignals.push(siInfo);
+		addSignal(siInfo);
 	}
 }
 
@@ -36,8 +35,14 @@ void SignalListener::cancel() {
 	m_isCanceled = true;
 }
 
-void SignalListener::waitForClient() {
+void SignalListener::waitForSignal() {
 	MutexLocker locker(&m_mutex);
 	log_info("Waiting");
-	pthread_cond_wait(&m_clientArrived, &m_mutex);
+	pthread_cond_wait(&m_clientNewSignal, &m_mutex);
+}
+
+void SignalListener::addSignal(const SharedSiInfo& siInfo) {
+	MutexLocker locker(&m_mutex);
+	m_waitingSignals.push(siInfo);
+	pthread_cond_signal(&m_clientNewSignal);
 }

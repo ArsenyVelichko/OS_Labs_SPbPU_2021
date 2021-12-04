@@ -4,28 +4,25 @@
 
 #include "Connection.h"
 #include "MultiThreading/Runnable.h"
+#include "GameProto.h"
+
+using GameProto::PlayerStatus;
 
 class Player : public Runnable {
 public:
-	Player(int id, int timeout, bool create);
+	Player(int id, int timeout, Connection::Role connRole);
 	~Player() override;
 
-	enum Status : char {
-		Status_Dead,
-		Status_Alive,
-	};
-
-	//Value to inform player, that game has been ended
-	static constexpr char EndGameValue = -1;
-
 	int id() const;
-	Status status() const;
+	PlayerStatus status() const;
 
 protected:
-	Connection* conn() const;
-	void setStatus(Status status);
+	void writeMessage(const GameProto::Message& msg);
+	void readMessage(GameProto::Message& msg);
+
+	void setStatus(PlayerStatus status);
 
 private:
 	Connection* m_conn;
-	Status m_status = Status_Alive;
+	PlayerStatus m_status = GameProto::Status_Alive;
 };

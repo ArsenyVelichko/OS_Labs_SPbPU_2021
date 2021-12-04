@@ -25,8 +25,8 @@ GameEngine::GameEngine() :
 
 void GameEngine::exec() {
 	m_gameThreadPool->start(m_signalListener);
-	m_signalListener->waitForClient();
-	log_info("Client arrived");
+	m_signalListener->waitForSignal();
+
 	int turnsWithoutAlive = 0;
 	m_playerId = 0;
 	m_gameTimer->start(1000);
@@ -47,7 +47,7 @@ void GameEngine::exec() {
 		}
 	}
 
-	m_controlBlock->setGameValue(Player::EndGameValue);
+	m_controlBlock->setGameValue(EndGameValue);
 	m_signalListener->cancel();
 }
 

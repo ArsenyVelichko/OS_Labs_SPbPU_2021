@@ -3,12 +3,16 @@
 #include <string>
 
 #include "Connection.h"
-#include "IODevice.h"
+#include "IOStream.h"
 
-class File : public IODevice {
+class File : public IOStream {
 public:
-	bool open(const std::string& name, int flags);
+	void open(const std::string& path, int flags);
+	bool isOpened() const;
+	void close();
 	~File();
+
+	std::string path() const;
 
 	ssize_t read(char *data, size_t size) override;
 	ssize_t write(const char *data, size_t size) override;
@@ -16,12 +20,15 @@ public:
 	int waitForReadyRead(int timeout) override;
 
 private:
-	int m_fd = -1;
+	std::string m_path;
+	int m_fd;
+	bool m_isOpened = false;
 };
 
 class ConnectionPrivate {
 public:
-	ConnectionPrivate(Connection* conn, bool create);
+	ConnectionPrivate(Connection* conn);
+	~ConnectionPrivate();
 
 	ssize_t read(char* data, size_t size);
 	ssize_t write(const char* data, size_t size);

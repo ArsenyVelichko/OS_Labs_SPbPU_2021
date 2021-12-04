@@ -1,8 +1,8 @@
 #include "Connection.h"
 #include CONN_IMPL_HEADER
 
-Connection::Connection(int id, int timeout, bool create)
-	: m_id(id), m_timeout(timeout), m_pImpl(new ConnectionPrivate(this, create)) {}
+Connection::Connection(int id, int timeout, Role role)
+	: m_id(id), m_timeout(timeout), m_role(role), m_pImpl(new ConnectionPrivate(this)) {}
 
 const ConnectionPrivate* Connection::pImpl() const {
 	return m_pImpl.get();
@@ -26,6 +26,10 @@ int Connection::id() const {
 
 int Connection::timeout() const {
 	return m_timeout;
+}
+
+Connection::Role Connection::role() const {
+	return m_role;
 }
 
 Connection::~Connection() = default;

@@ -10,9 +10,7 @@ public:
 	void run() override;
 
 private:
-	int readClientValue();
-	Status updateStatus(int gameValue, int clientValue);
-	void writeAnswer(char answer);
+	PlayerStatus updateStatus(int gameValue, int clientValue);
 
 	SharedControlBlock m_controlBlock;
 

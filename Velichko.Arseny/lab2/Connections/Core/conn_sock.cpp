@@ -5,14 +5,14 @@
 #include "Logger.h"
 #include "conn_sock.h"
 
-ConnectionPrivate::ConnectionPrivate(Connection* conn, bool create)
+ConnectionPrivate::ConnectionPrivate(Connection* conn)
 	: m_conn(conn), m_socket(new UdpSocket) {
 	const std::string& idStr = 	std::to_string(conn->id());
 
 	UnixHostAddress sendAddr = std::string(HOST_ADDR_PREFIX) + idStr;
 	UnixHostAddress receiveAddr = std::string(CLIENT_ADDR_PREFIX) + idStr;
 
-	if (create) {
+	if (m_conn->role() == Connection::Host) {
 		std::swap(sendAddr, receiveAddr);
 	}
 	m_socket->bind(receiveAddr);
@@ -62,6 +62,10 @@ ssize_t UdpSocket::read(char* data, size_t size) {
 
 void UdpSocket::setHost(const UnixHostAddress& address) {
 	m_hostAddress = address;
+}
+
+UdpSocket::~UdpSocket() {
+	unlink(m_hostAddress.name().c_str());
 }
 
 UnixHostAddress::UnixHostAddress(const std::string& name) {

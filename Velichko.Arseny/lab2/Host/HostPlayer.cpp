@@ -3,30 +3,35 @@
 #include "HostPlayer.h"
 #include "GameEngine.h"
 
-#include "Serialization.h"
+
+#include "GameProto.h"
 
 HostPlayer::HostPlayer(int id, const SharedControlBlock& controlBlock) :
-	Player(id, 10000, true), m_controlBlock(controlBlock) {}
+	Player(id, 10000, Connection::Host), m_controlBlock(controlBlock) {}
 
 void HostPlayer::run() {
+	GameProto::Message msg = {};
+	int gameValue;
 
-	while (true) {
+	do {
 		try {
-			int gameValue = m_controlBlock->waitGameValue();
-			log_info("Read started");
-			if (gameValue == EndGameValue) {
-				writeAnswer(EndGameValue);
-				break;
+			gameValue = m_controlBlock->waitGameValue();
+
+			readMessage(msg);
+			log_info("State: " + std::to_string(msg.state));
+			if (msg.state & GameProto::ClientFinished) { break; }
+			int clientValue = msg.data.clientValue;
+			log_info(std::to_string(clientValue));
+
+			if (gameValue == GameEngine::EndGameValue) {
+				msg.state |= GameProto::GameFinished;
 			}
 
-			int clientValue = readClientValue();
-			log_info(std::to_string(clientValue));
-			updateStatus(gameValue, clientValue);
+			PlayerStatus newStatus = updateStatus(gameValue, clientValue);
+			msg.data.playerStatus = newStatus;
+			writeMessage(msg);
 
-			Status newStatus = updateStatus(gameValue, clientValue);
-			writeAnswer(newStatus);
-			if (newStatus == Status_Alive) {
-				log_info("Player survived");
+			if (newStatus == GameProto::Status_Alive) {
 				m_controlBlock->playerSurvived();
 			}
 
@@ -34,38 +39,24 @@ void HostPlayer::run() {
 			log_error(e.what());
 			break;
 		}
-	}
+	} while (gameValue != GameEngine::EndGameValue);
 
+	readMessage(msg);
 	m_controlBlock->playerLeft();
 }
 
-int HostPlayer::readClientValue() {
-	size_t size = sizeof(int);
-	char data[size];
+PlayerStatus HostPlayer::updateStatus(int gameValue, int clientValue) {
+	using namespace GameProto;
 
-	if (conn()->read(data, size) != size) {
-		throw std::runtime_error("Invalid read");
-	}
-	return Serialization::parse<int>(data);
-}
-
-void HostPlayer::writeAnswer(char answer) {
-	size_t size = 1;
-	if (conn()->write(&answer, size) < size) {
-		throw std::runtime_error("Invalid write");
-	}
-}
-
-Player::Status HostPlayer::updateStatus(int gameValue, int clientValue) {
-	Status currStatus = status();
-	Status newStatus = currStatus;
+	PlayerStatus currStatus = status();
+	PlayerStatus newStatus = currStatus;
 
 	int diff = abs(gameValue - clientValue);
 
 	if (currStatus == Status_Alive && !hideCondition(diff)) {
 		newStatus = Status_Dead;
 
-	} else if (currStatus == Status_Dead && resurrectCondition(diff)) {
+	} else if (currStatus == Status_Alive && resurrectCondition(diff)) {
 		newStatus = Status_Alive;
 	}
 

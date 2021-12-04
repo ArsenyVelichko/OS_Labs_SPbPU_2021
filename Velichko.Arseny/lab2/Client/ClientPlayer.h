@@ -11,9 +11,7 @@ public:
 	void run() override;
 
 private:
-	void writeClientValue(int value);
-	void updateStatus(Status newStatus);
-	char readAnswer();
+	void updateStatus(PlayerStatus newStatus);
 
 	RandGenerator* m_randGenerator;
 };

@@ -6,7 +6,7 @@
 #include <memory>
 
 #include "Connection.h"
-#include "IODevice.h"
+#include "IOStream.h"
 
 class UnixHostAddress {
 public:
@@ -25,9 +25,10 @@ private:
 	std::shared_ptr<sockaddr_un> m_socketAddr;
 };
 
-class UdpSocket : public IODevice {
+class UdpSocket : public IOStream {
 public:
 	UdpSocket();
+	~UdpSocket();
 
 	void setHost(const UnixHostAddress& address);
 
@@ -44,7 +45,7 @@ private:
 
 class ConnectionPrivate {
 public:
-	ConnectionPrivate(Connection* conn, bool create);
+	ConnectionPrivate(Connection* conn);
 	~ConnectionPrivate();
 
 	ssize_t read(char* data, size_t size);
