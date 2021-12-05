@@ -15,7 +15,7 @@ GameEngine::GameEngine() :
 	m_controlBlock(new GameControlBlock),
 	m_gameThreadPool(new ThreadPool) {
 
-	auto siSet = SignalUtils::createSiSet({ SIGUSR1 });
+	auto siSet = SignalUtils::createSiSet({ SIGUSR1, SIGINT, SIGTERM });
 	m_signalListener = new SignalListener(siSet);
 	m_signalListener->setAutoDelete(false);
 
@@ -36,14 +36,17 @@ void GameEngine::exec() {
 	m_gameTimer->start(TurnInterval);
 
 	while (turnsWithoutAlive < TurnsWithoutAlive) {
-		processSignals();
+		if (!processSignals()) { break; }
 		m_controlBlock->waitAllPlayers();
 
-		int newGameValue = m_randGenerator->generate();
-		m_controlBlock->setGameValue(newGameValue);
+		int gameValue = m_randGenerator->generate();
+		log_info("Generated game value: " + std::to_string(gameValue));
+		m_controlBlock->setGameValue(gameValue);
 		waitTurn();
 
-		if (m_controlBlock->aliveCount() == 0) {
+		uint32_t aliveCount = m_controlBlock->aliveCount();
+		log_info("Players alive: " + std::to_string(aliveCount));
+		if (aliveCount == 0) {
 			turnsWithoutAlive++;
 		} else {
 			turnsWithoutAlive = 0;
@@ -54,15 +57,27 @@ void GameEngine::exec() {
 	m_signalListener->cancel();
 }
 
-void GameEngine::processSignals() {
+bool GameEngine::processSignals() {
 	while (!m_signalListener->empty()) {
 		auto siInfo = m_signalListener->accept();
+
+		int signo = siInfo->si_signo;
+		if (signo == SIGINT || signo == SIGTERM) {
+			return false;
+		}
+
 		int clientPid = siInfo->si_value.sival_int;
 
+		int playerId = addPlayer();
+		if (playerId == -1) { continue; }
+
 		sigval answerVal = {};
-		answerVal.sival_int = addPlayer();
-		sigqueue(clientPid, SIGUSR1, answerVal);
+		answerVal.sival_int = playerId;
+		if (sigqueue(clientPid, SIGUSR1, answerVal) == -1) {
+			log_errno("Failed to send answer to client");
+		}
 	}
+	return true;
 }
 
 void GameEngine::makeTurn() {
@@ -74,7 +89,7 @@ GameEngine::~GameEngine() {
 	delete m_gameTimer;
 	delete m_randGenerator;
 
-	m_gameThreadPool->join();
+	m_gameThreadPool->waitForDone();
 	delete m_gameThreadPool;
 	delete m_signalListener;
 }
@@ -85,8 +100,13 @@ void GameEngine::waitTurn() {
 }
 
 int GameEngine::addPlayer() {
-	m_gameThreadPool->start(new HostPlayer(m_playerId, m_controlBlock));
-	m_controlBlock->playerJoined();
-	return m_playerId++;
+	auto player = new HostPlayer(m_playerId, m_controlBlock);
+
+	if (m_gameThreadPool->start(player)) {
+		m_controlBlock->playerJoined();
+		return m_playerId++;
+	}
+	log_error("Failed to add new player");
+	return -1;
 }
 

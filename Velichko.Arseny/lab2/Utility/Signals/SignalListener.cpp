@@ -19,8 +19,8 @@ bool SignalListener::empty() const {
 }
 
 void SignalListener::run() {
+	log_info("Listening started");
 	while (!m_isCanceled) {
-		log_info("Listening");
 		siginfo_t siInfo;
 		if (sigtimedwait(m_signalSet.get(), &siInfo, &m_timeout) == -1) {
 			continue;
@@ -37,7 +37,6 @@ void SignalListener::cancel() {
 
 void SignalListener::waitForSignal() {
 	MutexLocker locker(&m_mutex);
-	log_info("Waiting");
 	pthread_cond_wait(&m_clientNewSignal, &m_mutex);
 }
 

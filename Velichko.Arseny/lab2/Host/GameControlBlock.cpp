@@ -1,6 +1,8 @@
 #include "GameControlBlock.h"
 #include "MultiThreading/MutexLocker.h"
 
+#include "Logger.h"
+
 void GameControlBlock::setGameValue(int value) {
 	MutexLocker locker(&m_mutex);
 	m_aliveCount = 0;
@@ -17,6 +19,7 @@ int GameControlBlock::waitGameValue() {
 }
 
 void GameControlBlock::playerJoined() {
+	log_info("New player joined");
 	m_playersCount++;
 }
 

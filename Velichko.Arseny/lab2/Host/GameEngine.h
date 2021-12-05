@@ -18,7 +18,7 @@ public:
 	void exec();
 
 private:
-	void processSignals();
+	bool processSignals();
 	int addPlayer();
 
 	void makeTurn();

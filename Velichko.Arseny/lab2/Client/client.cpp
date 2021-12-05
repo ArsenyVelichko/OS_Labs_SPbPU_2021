@@ -22,9 +22,11 @@ int main(int argc, char** argv) {
 	int id = helper.waitAnswer(HandshakeWaitTime);
 	if (id == -1) { return EXIT_FAILURE; }
 
+	log_info("Successfully connected to host with id:" + std::to_string(id));
+
 	auto threadPool = std::make_unique<ThreadPool>();
 	threadPool->start(new ClientPlayer(id));
-	threadPool->join();
+	threadPool->waitForDone();
 
 	return 0;
 }

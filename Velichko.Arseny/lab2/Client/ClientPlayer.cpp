@@ -17,12 +17,17 @@ void ClientPlayer::run() {
 	while (true) {
 		try {
 			int clientValue = m_randGenerator->generate();
+			log_info("Generated client value: " + std::to_string(clientValue));
+
 			msg.data.clientValue = clientValue;
 			writeMessage(msg);
 
 			readMessage(msg);
 			if (msg.state & GameProto::GameFinished) { break; }
-			updateStatus(msg.data.playerStatus);
+
+			PlayerStatus status = msg.data.playerStatus;
+			log_info("Received status: " + std::to_string(status));
+			updateStatus(status);
 
 		} catch (std::exception& e) {
 			log_error(e.what());

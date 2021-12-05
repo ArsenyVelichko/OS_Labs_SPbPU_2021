@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <cstring>
 
 #include "Logger.h"
 
@@ -34,4 +35,8 @@ void Logger::log(Level level, const std::string& message,
 				<< message << '\n';
 
 	*m_os << completeMsg.str();
+}
+
+std::string Logger::errorDesc(const std::string& message, int errnum) {
+	return message + " (" + strerror(errnum) + ")";
 };

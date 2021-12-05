@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <csignal>
+#include <cstring>
 
 #include "ThreadPool.h"
 #include "MutexLocker.h"
@@ -20,38 +21,43 @@ void* ThreadPool::onStartThread(void* arg) {
 	return nullptr;
 }
 
-void ThreadPool::start(Runnable* runnable) {
+bool ThreadPool::start(Runnable* runnable) {
 	pthread_t thread;
 	auto info = new RunnableInfo{ this, runnable };
-	pthread_create(&thread, nullptr, onStartThread, info);
+	int createRes = pthread_create(&thread, nullptr, onStartThread, info);
+
+	if (createRes != 0) {
+		delete info;
+		log_error_desc("On thread creation occurred error", createRes);
+		return false;
+	}
 
 	MutexLocker locker(&m_mutex);
 	m_threads.push_back(thread);
+	return true;
 }
 
-void ThreadPool::join() {
-	size_t currSize;
-	size_t i = 0;
-
-	do {
-		pthread_t thread;
-
+void ThreadPool::waitForDone() {
+	while (activeThreadCount() != 0) {
 		MutexLocker locker(&m_mutex);
-		currSize = m_threads.size();
-		thread = m_threads[i];
+		pthread_t thread = m_threads.front();
 		locker.unlock();
 
 		pthread_join(thread, nullptr);
-		i++;
-
-	} while (i < currSize);
+	};
 }
 
 void ThreadPool::removeThread(pthread_t thread) {
 	MutexLocker locker(&m_mutex);
-	std::remove(m_threads.begin(), m_threads.end(), thread);
+	auto it = std::find(m_threads.begin(), m_threads.end(), thread);
+	m_threads.erase(it);
 }
 
 void ThreadPool::setBlockMask(const SharedSiSet& set) {
 	pthread_sigmask(SIG_BLOCK, set.get(), nullptr);
+}
+
+size_t ThreadPool::activeThreadCount() const {
+	MutexLocker locker(&m_mutex);
+	return m_threads.size();
 }

@@ -1,19 +1,19 @@
 #pragma once
 
 #include <pthread.h>
-#include <vector>
+#include <list>
 
 #include "Runnable.h"
-#include "Singleton.h"
 #include "Signals/SignalsUtils.h"
 
 using SignalUtils::SharedSiSet;
 
 class ThreadPool {
 public:
-	void start(Runnable* runnable);
-	void join();
+	bool start(Runnable* runnable);
+	void waitForDone();
 
+	size_t activeThreadCount() const;
 	static void setBlockMask(const SharedSiSet& set);
 
 private:
@@ -25,6 +25,6 @@ private:
 		Runnable* runnable;
 	};
 
-	pthread_mutex_t m_mutex = PTHREAD_MUTEX_INITIALIZER;
-	std::vector<pthread_t> m_threads;
+	mutable pthread_mutex_t m_mutex = PTHREAD_MUTEX_INITIALIZER;
+	std::list<pthread_t> m_threads;
 };

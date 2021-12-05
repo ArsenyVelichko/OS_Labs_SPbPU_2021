@@ -38,6 +38,7 @@ ConnectionPrivate::~ConnectionPrivate() {
 SharedBuffer::SharedBuffer(int key, size_t size, int flags) {
 	m_memId = shmget(key, size + sizeof(Header), flags);
 	if (m_memId == -1) {
+		perror("");
 		throw std::runtime_error("Failed to create memory segment");
 	}
 

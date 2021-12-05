@@ -23,6 +23,8 @@ public:
 	void log(Level level, const std::string& message,
 			 const std::string& file, const std::string& function, int line);
 
+	static std::string errorDesc(const std::string& message, int errnum);
+
 protected:
 	Logger();
 	Logger(const std::string& filename);
@@ -48,3 +50,6 @@ private:
 #define log_warning(msg) log_macro(Logger::Level_Warning, msg)
 #define log_error(msg) log_macro(Logger::Level_Error, msg)
 #define log_wtf(msg) log_macro(Logger::Level_WhatATerribleFailure, msg)
+
+#define log_error_desc(msg, errnum) log_error(Logger::errorDesc(msg, errnum))
+#define log_errno(msg) log_error_desc(msg, errno)
