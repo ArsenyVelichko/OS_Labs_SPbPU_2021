@@ -14,6 +14,8 @@ ClientPlayer::ClientPlayer(int id) :
 void ClientPlayer::run() {
 	GameProto::Message msg = {};
 
+	log_info("Player started");
+
 	while (true) {
 		try {
 			int clientValue = m_randGenerator->generate();
@@ -34,6 +36,8 @@ void ClientPlayer::run() {
 			break;
 		}
 	}
+
+	log_info("Player finished");
 }
 
 void ClientPlayer::updateStatus(PlayerStatus newStatus) {

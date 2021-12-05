@@ -31,6 +31,7 @@ void GameEngine::exec() {
 	m_gameThreadPool->start(m_signalListener);
 	m_signalListener->waitForSignal();
 
+	log_info("Game started");
 	int turnsWithoutAlive = 0;
 	m_playerId = 0;
 	m_gameTimer->start(TurnInterval);
@@ -55,6 +56,8 @@ void GameEngine::exec() {
 
 	m_controlBlock->setGameValue(EndGameValue);
 	m_signalListener->cancel();
+
+	log_info("Game finished");
 }
 
 bool GameEngine::processSignals() {
@@ -106,6 +109,7 @@ int GameEngine::addPlayer() {
 		m_controlBlock->playerJoined();
 		return m_playerId++;
 	}
+
 	log_error("Failed to add new player");
 	return -1;
 }

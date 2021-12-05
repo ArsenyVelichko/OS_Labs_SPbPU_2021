@@ -21,7 +21,7 @@ int HandshakeHelper::waitAnswer(int timeout) const {
 	siginfo_t sigInfo;
 	timespec timespec = TimeUtils::msecToTimespec(timeout);
 	if (sigtimedwait(m_siSet.get(), &sigInfo, &timespec) == -1) {
-		log_error("No signal");
+		log_error("Host signal timeout expired");
 		return -1;
 	}
 	return sigInfo.si_value.sival_int;

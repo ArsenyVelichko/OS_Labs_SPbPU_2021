@@ -19,7 +19,6 @@ int GameControlBlock::waitGameValue() {
 }
 
 void GameControlBlock::playerJoined() {
-	log_info("New player joined");
 	m_playersCount++;
 }
 

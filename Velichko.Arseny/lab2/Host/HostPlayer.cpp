@@ -15,13 +15,16 @@ void HostPlayer::run() {
 	GameProto::Message msg = {};
 	int gameValue;
 
+	std::string logMsg = "Player " + std::to_string(id()) + ": ";
+	log_info(logMsg + "started");
+
 	do {
 		try {
 			gameValue = m_controlBlock->waitGameValue();
 
 			readMessage(msg);
 			int clientValue = msg.data.clientValue;
-			log_info(std::to_string(clientValue));
+			log_info(logMsg + "received from client: " + std::to_string(clientValue));
 
 			if (gameValue == EndGameValue) {
 				msg.state |= GameProto::GameFinished;
@@ -36,12 +39,13 @@ void HostPlayer::run() {
 			}
 
 		} catch (std::exception& e) {
-			log_error(e.what());
+			log_error(logMsg + "error occurred (" + e.what() + ")");
 			break;
 		}
 	} while (gameValue != EndGameValue);
 
 	m_controlBlock->playerLeft();
+	log_info(logMsg + "finished");
 }
 
 PlayerStatus HostPlayer::updateStatus(int gameValue, int clientValue) {
