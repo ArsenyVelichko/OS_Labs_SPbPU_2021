@@ -6,6 +6,8 @@ target_include_directories(ConnInterface INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 file(GLOB CONN_SOURCES *.cpp *.h)
 file(GLOB CONN_IMPLS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/Core Core/conn_*.cpp)
 
+set(CONNECTIONS "")
+
 foreach(CONN_IMPL ${CONN_IMPLS})
     string(REGEX MATCH "(conn_)([A-Za-z0-9_]*)(.cpp)" CONN_IMPL "${CONN_IMPL}")
     set(CONN_NAME "${CMAKE_MATCH_2}")
