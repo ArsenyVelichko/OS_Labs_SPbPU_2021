@@ -22,7 +22,7 @@ Player::~Player() {
 }
 
 void Player::writeMessage(const GameProto::Message& msg) {
-	size_t size = sizeof(GameProto::Message);
+	ssize_t size = sizeof(GameProto::Message);
 	auto data = reinterpret_cast<const char*>(&msg);
 
 	if (m_conn->write(data, size) < size) {
@@ -31,7 +31,7 @@ void Player::writeMessage(const GameProto::Message& msg) {
 }
 
 void Player::readMessage(GameProto::Message& msg) {
-	size_t size = sizeof(GameProto::Message);
+	ssize_t size = sizeof(GameProto::Message);
 	auto data = reinterpret_cast<char*>(&msg);
 
 	if (m_conn->read(data, size) < size) {

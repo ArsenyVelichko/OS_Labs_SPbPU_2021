@@ -60,6 +60,8 @@ SharedBuffer::SharedBuffer(int key, size_t size, int flags) {
 ssize_t SharedBuffer::read(char* data, size_t size) {
 	MutexLocker locker(&m_header->mutex);
 
+	if (m_header->writerPid == getpid()) { return -1; }
+
 	size_t readSize = std::min(m_header->pos, size);
 	size_t bias = m_header->pos - readSize;
 	memcpy(data, m_data + bias, readSize);
