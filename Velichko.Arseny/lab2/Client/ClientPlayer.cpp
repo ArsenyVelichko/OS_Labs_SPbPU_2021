@@ -5,7 +5,7 @@
 #include "Logger.h"
 
 ClientPlayer::ClientPlayer(int id) :
-	Player(id, 20000, Connection::Client), m_randGenerator(new RandGenerator(0, 100)) {}
+	Player(id, 5000, Connection::Client), m_randGenerator(new RandGenerator(0, 100)) {}
 
 void ClientPlayer::run() {
 	GameProto::Message msg = {};

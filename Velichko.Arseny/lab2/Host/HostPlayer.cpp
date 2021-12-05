@@ -3,11 +3,10 @@
 #include "HostPlayer.h"
 #include "GameEngine.h"
 
-
 #include "GameProto.h"
 
 HostPlayer::HostPlayer(int id, const SharedControlBlock& controlBlock) :
-	Player(id, 30000, Connection::Host), m_controlBlock(controlBlock) {}
+	Player(id, 5000, Connection::Host), m_controlBlock(controlBlock) {}
 
 void HostPlayer::run() {
 	GameProto::Message msg = {};

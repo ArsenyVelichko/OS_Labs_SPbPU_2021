@@ -85,8 +85,11 @@ ssize_t SharedBuffer::write(const char* data, size_t size) {
 int SharedBuffer::waitForReadyRead(int timeout) {
 	MutexLocker locker(&m_header->mutex);
 	pid_t pid = getpid();
+
+	timespec absTimeout = TimeUtils::absTimeout(timeout);
 	while (m_header->pos == 0 || m_header->writerPid == pid) {
-		pthread_cond_wait(&m_header->cond, &m_header->mutex);
+		int waitRes = pthread_cond_timedwait(&m_header->cond, &m_header->mutex, &absTimeout);
+		if (waitRes != 0) { return 0; }
 	}
 	return 1;
 }

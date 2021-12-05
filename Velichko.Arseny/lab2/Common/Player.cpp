@@ -1,3 +1,5 @@
+#include <stdexcept>
+
 #include "Player.h"
 
 Player::Player(int id, int timeout, Connection::Role connRole) :
@@ -20,11 +22,19 @@ Player::~Player() {
 }
 
 void Player::writeMessage(const GameProto::Message& msg) {
+	size_t size = sizeof(GameProto::Message);
 	auto data = reinterpret_cast<const char*>(&msg);
-	m_conn->write(data, sizeof(GameProto::Message));
+
+	if (m_conn->write(data, size) < size) {
+		throw std::runtime_error("Message write failed");
+	}
 }
 
 void Player::readMessage(GameProto::Message& msg) {
+	size_t size = sizeof(GameProto::Message);
 	auto data = reinterpret_cast<char*>(&msg);
-	m_conn->read(data, sizeof(GameProto::Message));
+
+	if (m_conn->read(data, size) < size) {
+		throw std::runtime_error("Message read failed");
+	}
 }
