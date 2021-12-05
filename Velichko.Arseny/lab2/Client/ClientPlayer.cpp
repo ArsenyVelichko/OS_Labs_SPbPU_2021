@@ -16,14 +16,9 @@ void ClientPlayer::run() {
 			msg.data.clientValue = clientValue;
 			writeMessage(msg);
 
-			if (msg.state & GameProto::ClientFinished) { break; }
-
 			readMessage(msg);
+			if (msg.state & GameProto::GameFinished) { break; }
 			updateStatus(msg.data.playerStatus);
-
-			if (msg.state & GameProto::GameFinished) {
-				msg.state |= GameProto::ClientFinished;
-			}
 
 		} catch (std::exception& e) {
 			log_error(e.what());

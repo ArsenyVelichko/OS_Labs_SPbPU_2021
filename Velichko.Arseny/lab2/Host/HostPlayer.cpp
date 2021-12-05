@@ -7,7 +7,7 @@
 #include "GameProto.h"
 
 HostPlayer::HostPlayer(int id, const SharedControlBlock& controlBlock) :
-	Player(id, 10000, Connection::Host), m_controlBlock(controlBlock) {}
+	Player(id, 30000, Connection::Host), m_controlBlock(controlBlock) {}
 
 void HostPlayer::run() {
 	GameProto::Message msg = {};
@@ -18,8 +18,6 @@ void HostPlayer::run() {
 			gameValue = m_controlBlock->waitGameValue();
 
 			readMessage(msg);
-			log_info("State: " + std::to_string(msg.state));
-			if (msg.state & GameProto::ClientFinished) { break; }
 			int clientValue = msg.data.clientValue;
 			log_info(std::to_string(clientValue));
 
@@ -41,7 +39,6 @@ void HostPlayer::run() {
 		}
 	} while (gameValue != GameEngine::EndGameValue);
 
-	readMessage(msg);
 	m_controlBlock->playerLeft();
 }
 

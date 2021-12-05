@@ -4,4 +4,5 @@
 
 namespace TimeUtils {
 	timespec msecToTimespec(int msec);
+	timespec absTimeout(int msec);
 }

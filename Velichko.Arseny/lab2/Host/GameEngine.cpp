@@ -12,7 +12,7 @@ GameEngine::GameEngine() :
 	m_gameThreadPool(new ThreadPool) {
 
 	auto siSet = SignalUtils::createSiSet({ SIGUSR1 });
-	m_signalListener = new SignalListener(siSet, 5000);
+	m_signalListener = new SignalListener(siSet, 1000);
 	m_signalListener->setAutoDelete(false);
 
 	ThreadPool::setBlockMask(siSet);

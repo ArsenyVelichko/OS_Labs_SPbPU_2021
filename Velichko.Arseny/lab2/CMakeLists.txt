@@ -6,7 +6,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 add_compile_definitions(PROJECT_DIR="${CMAKE_SOURCE_DIR}")
 
-list(APPEND CONNECTIONS "sock" "fifo")
+list(APPEND CONNECTIONS "sock" "fifo" "seg")
 
 add_subdirectory(Common)
 add_subdirectory(Utility)

@@ -14,7 +14,6 @@ namespace GameProto {
 
 	enum State {
 		GameFinished = 0x1,
-		ClientFinished = 0x2,
 	};
 
 	struct Message {

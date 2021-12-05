@@ -3,7 +3,6 @@
 #include "MultiThreading/MutexLocker.h"
 #include "TimeUtils.h"
 
-
 SignalListener::SignalListener(const SharedSiSet& signalSet, int timeout)
 	: m_timeout(TimeUtils::msecToTimespec(timeout)), m_signalSet(signalSet) {}
 
@@ -22,12 +21,13 @@ bool SignalListener::empty() const {
 void SignalListener::run() {
 	while (!m_isCanceled) {
 		log_info("Listening");
-		SharedSiInfo siInfo = std::make_shared<siginfo_t>();
-		if (sigtimedwait(m_signalSet.get(), siInfo.get(), &m_timeout) == -1) {
+		siginfo_t siInfo;
+		if (sigtimedwait(m_signalSet.get(), &siInfo, &m_timeout) == -1) {
 			continue;
 		}
 
-		addSignal(siInfo);
+		auto sharedInfo = std::make_shared<siginfo_t>(siInfo);
+		addSignal(sharedInfo);
 	}
 }
 

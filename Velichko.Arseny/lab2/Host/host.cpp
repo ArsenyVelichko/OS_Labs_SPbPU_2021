@@ -1,5 +1,7 @@
+#include <iostream>
 #include "Logger.h"
 #include "GameEngine.h"
+#include "Connection.h"
 
 int main(void) {
 	Logger::create();
