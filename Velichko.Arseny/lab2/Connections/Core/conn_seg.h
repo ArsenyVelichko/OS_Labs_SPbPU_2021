@@ -30,8 +30,8 @@ private:
 
 	size_t loadSize() const;
 
-	Header* m_header;
-	char* m_data;
+	Header* m_header = nullptr;
+	char* m_data = nullptr;
 	size_t m_dataSize;
 	int m_memId;
 };

@@ -3,7 +3,7 @@
 namespace GameDefines {
 	constexpr int TurnInterval = 2000;
 	constexpr int HostWaitTime = 5000;
-	constexpr int ClientWaitTime = TurnInterval + 3000;
+	constexpr int ClientWaitTime = HostWaitTime + 3000;
 	constexpr int HandshakeWaitTime = 5000;
 
 	constexpr int TurnsWithoutAlive = 2;

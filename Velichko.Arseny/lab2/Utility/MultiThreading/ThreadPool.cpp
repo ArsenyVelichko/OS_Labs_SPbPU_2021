@@ -23,10 +23,7 @@ void* ThreadPool::onStartThread(void* arg) {
 void ThreadPool::start(Runnable* runnable) {
 	pthread_t thread;
 	auto info = new RunnableInfo{ this, runnable };
-	if (pthread_create(&thread, nullptr, onStartThread, info) != 0) {
-		log_error("Pthread create failed");
-		return;
-	}
+	pthread_create(&thread, nullptr, onStartThread, info);
 
 	MutexLocker locker(&m_mutex);
 	m_threads.push_back(thread);

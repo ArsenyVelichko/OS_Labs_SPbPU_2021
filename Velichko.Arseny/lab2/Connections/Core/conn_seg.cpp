@@ -38,8 +38,7 @@ ConnectionPrivate::~ConnectionPrivate() {
 SharedBuffer::SharedBuffer(int key, size_t size, int flags) {
 	m_memId = shmget(key, size + sizeof(Header), flags);
 	if (m_memId == -1) {
-		log_error("Failed to create shared memory segment");
-		return;
+		throw std::runtime_error("Failed to create memory segment");
 	}
 
 	auto segPtr = shmat(m_memId, nullptr, 0);
@@ -60,7 +59,10 @@ SharedBuffer::SharedBuffer(int key, size_t size, int flags) {
 ssize_t SharedBuffer::read(char* data, size_t size) {
 	MutexLocker locker(&m_header->mutex);
 
-	if (m_header->writerPid == getpid()) { return -1; }
+	if (m_header->writerPid == getpid()) {
+		log_error("Can't read data from same process");
+		return -1;
+	}
 
 	size_t readSize = std::min(m_header->pos, size);
 	size_t bias = m_header->pos - readSize;
@@ -117,13 +119,10 @@ size_t SharedBuffer::loadSize() const {
 }
 
 SharedBuffer::~SharedBuffer() {
-	if (shmdt(m_header) == -1) {
-		log_error("Shared memory detach error");
-	}
+	shmdt(m_header);
 }
 
 void SharedBuffer::scheduleDestroy() {
-	if (shmctl(m_memId, IPC_RMID, nullptr) == -1) {
-		log_error("Shared memory destroy error");
-	}
+	shmctl(m_memId, IPC_RMID, nullptr);
 }
+
