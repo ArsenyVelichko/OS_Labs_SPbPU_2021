@@ -2,10 +2,14 @@
 
 #include "ClientPlayer.h"
 #include "GameProto.h"
+#include "GameDefines.h"
 #include "Logger.h"
 
+using namespace GameDefines;
+
 ClientPlayer::ClientPlayer(int id) :
-	Player(id, 5000, Connection::Client), m_randGenerator(new RandGenerator(0, 100)) {}
+	Player(id, ClientWaitTime, Connection::Client),
+	m_randGenerator(new RandGenerator(AliveMinValue, AliveMaxValue)) {}
 
 void ClientPlayer::run() {
 	GameProto::Message msg = {};
@@ -28,12 +32,19 @@ void ClientPlayer::run() {
 }
 
 void ClientPlayer::updateStatus(PlayerStatus newStatus) {
-	static std::vector<int> valueUpperBound = { 50, 100 };
+	if (status() == newStatus) { return; }
 
-	log_info("New status: " + std::to_string(newStatus));
+	switch (newStatus) {
+		case GameProto::Status_Alive:
+			m_randGenerator->setRange(AliveMinValue, AliveMaxValue);
+			break;
 
-	if (status() != newStatus) {
-		m_randGenerator->setRange(0, valueUpperBound[newStatus]);
-		setStatus(newStatus);
+		case GameProto::Status_Dead:
+			m_randGenerator->setRange(DeadMinValue, DeadMaxValue);
+			break;
+
+		default:
+			log_wtf("Unknown player status");
+			break;
 	}
 }

@@ -1,7 +1,11 @@
-#include "MultiThreading/ThreadPool.h"
 #include "Logger.h"
+#include "MultiThreading/ThreadPool.h"
+
 #include "ClientPlayer.h"
 #include "HandshakeHelper.h"
+#include "GameDefines.h"
+
+using namespace GameDefines;
 
 int main(int argc, char** argv) {
 	Logger::create();
@@ -15,7 +19,7 @@ int main(int argc, char** argv) {
 
 	HandshakeHelper helper(SIGUSR1);
 	helper.sendRequest(hostPid);
-	int id = helper.waitAnswer(5000);
+	int id = helper.waitAnswer(HandshakeWaitTime);
 	if (id == -1) { return EXIT_FAILURE; }
 
 	auto threadPool = std::make_unique<ThreadPool>();

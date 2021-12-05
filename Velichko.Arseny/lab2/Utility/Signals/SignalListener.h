@@ -12,7 +12,7 @@ using SignalUtils::SharedSiInfo;
 
 class SignalListener : public Runnable {
 public:
-	SignalListener(const SharedSiSet& siSet, int timeout);
+	explicit SignalListener(const SharedSiSet& siSet, int timeout = 1000);
 
 	SharedSiInfo accept();
 	bool empty() const;

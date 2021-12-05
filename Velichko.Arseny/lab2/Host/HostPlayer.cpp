@@ -4,9 +4,12 @@
 #include "GameEngine.h"
 
 #include "GameProto.h"
+#include "GameDefines.h"
+
+using namespace GameDefines;
 
 HostPlayer::HostPlayer(int id, const SharedControlBlock& controlBlock) :
-	Player(id, 5000, Connection::Host), m_controlBlock(controlBlock) {}
+	Player(id, HostWaitTime, Connection::Host), m_controlBlock(controlBlock) {}
 
 void HostPlayer::run() {
 	GameProto::Message msg = {};
@@ -20,7 +23,7 @@ void HostPlayer::run() {
 			int clientValue = msg.data.clientValue;
 			log_info(std::to_string(clientValue));
 
-			if (gameValue == GameEngine::EndGameValue) {
+			if (gameValue == EndGameValue) {
 				msg.state |= GameProto::GameFinished;
 			}
 
@@ -36,7 +39,7 @@ void HostPlayer::run() {
 			log_error(e.what());
 			break;
 		}
-	} while (gameValue != GameEngine::EndGameValue);
+	} while (gameValue != EndGameValue);
 
 	m_controlBlock->playerLeft();
 }
@@ -61,9 +64,9 @@ PlayerStatus HostPlayer::updateStatus(int gameValue, int clientValue) {
 }
 
 bool HostPlayer::hideCondition(int diff) const {
-	return diff <= 70 / m_controlBlock->playersCount();
+	return diff <= HideCondValue / m_controlBlock->playersCount();
 }
 
 bool HostPlayer::resurrectCondition(int diff) const {
-	return diff <= 20 / m_controlBlock->playersCount();
+	return diff <= ResurrectCondValue / m_controlBlock->playersCount();
 }

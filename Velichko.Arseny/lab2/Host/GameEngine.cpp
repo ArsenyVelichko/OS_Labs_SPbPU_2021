@@ -1,18 +1,22 @@
 #include <iostream>
 
 #include "Logger.h"
-#include "GameEngine.h"
 #include "MultiThreading/MutexLocker.h"
+
 #include "HostPlayer.h"
+#include "GameEngine.h"
+#include "GameDefines.h"
+
+using namespace GameDefines;
 
 GameEngine::GameEngine() :
 	m_gameTimer(new Timer),
-	m_randGenerator(new RandGenerator(0, 100)),
+	m_randGenerator(new RandGenerator(HostMinValue, HostMaxValue)),
 	m_controlBlock(new GameControlBlock),
 	m_gameThreadPool(new ThreadPool) {
 
 	auto siSet = SignalUtils::createSiSet({ SIGUSR1 });
-	m_signalListener = new SignalListener(siSet, 1000);
+	m_signalListener = new SignalListener(siSet);
 	m_signalListener->setAutoDelete(false);
 
 	ThreadPool::setBlockMask(siSet);
@@ -29,11 +33,10 @@ void GameEngine::exec() {
 
 	int turnsWithoutAlive = 0;
 	m_playerId = 0;
-	m_gameTimer->start(1000);
+	m_gameTimer->start(TurnInterval);
 
-	while (turnsWithoutAlive < 2) {
+	while (turnsWithoutAlive < TurnsWithoutAlive) {
 		processSignals();
-		log_info("Turn started");
 		m_controlBlock->waitAllPlayers();
 
 		int newGameValue = m_randGenerator->generate();

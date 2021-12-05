@@ -17,8 +17,6 @@ public:
 
 	void exec();
 
-	static constexpr int EndGameValue = -1;
-
 private:
 	void processSignals();
 	int addPlayer();
