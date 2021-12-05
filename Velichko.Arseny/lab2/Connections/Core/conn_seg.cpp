@@ -2,6 +2,7 @@
 #include <sys/shm.h>
 #include <cstring>
 #include <unistd.h>
+#include <fcntl.h>
 
 #include "conn_seg.h"
 
@@ -10,7 +11,7 @@
 #include "Logger.h"
 
 ConnectionPrivate::ConnectionPrivate(Connection* conn) : m_conn(conn) {
-	int flags = 0644;
+	int flags = S_IRWXU | S_IRWXG;
 	if (conn->role() == Connection::Host) {
 		flags |= IPC_CREAT | IPC_EXCL;
 	}

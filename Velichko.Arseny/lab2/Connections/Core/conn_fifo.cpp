@@ -13,8 +13,8 @@ ConnectionPrivate::ConnectionPrivate(Connection* conn) : m_conn(conn) {
 	std::string outFifoName = std::string(HOST_FIFO_PREFIX) + idStr;
 
 	if (m_conn->role() == Connection::Host) {
-		mkfifo(inFifoName.c_str(), 0666);
-		mkfifo(outFifoName.c_str(), 0666);
+		mkfifo(inFifoName.c_str(), S_IRWXU | S_IRWXG);
+		mkfifo(outFifoName.c_str(), S_IRWXU | S_IRWXG);
 		std::swap(inFifoName, outFifoName);
 	}
 
