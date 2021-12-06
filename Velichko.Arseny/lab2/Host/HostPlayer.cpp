@@ -15,8 +15,7 @@ void HostPlayer::run() {
 	GameProto::Message msg = {};
 	int gameValue;
 
-	std::string logMsg = "Player " + std::to_string(id()) + ": ";
-	log_info(logMsg + "started");
+	log_info(logPrefix() + "started");
 
 	do {
 		try {
@@ -24,7 +23,7 @@ void HostPlayer::run() {
 
 			readMessage(msg);
 			int clientValue = msg.data.clientValue;
-			log_info(logMsg + "received from client: " + std::to_string(clientValue));
+			log_info(logPrefix() + "received from client: " + std::to_string(clientValue));
 
 			if (gameValue == EndGameValue) {
 				msg.state |= GameProto::GameFinished;
@@ -39,13 +38,13 @@ void HostPlayer::run() {
 			}
 
 		} catch (std::exception& e) {
-			log_error(logMsg + "error occurred (" + e.what() + ")");
+			log_error(logPrefix() + "error occurred (" + e.what() + ")");
 			break;
 		}
 	} while (gameValue != EndGameValue);
 
 	m_controlBlock->playerLeft();
-	log_info(logMsg + "finished");
+	log_info(logPrefix() + "finished");
 }
 
 PlayerStatus HostPlayer::updateStatus(int gameValue, int clientValue) {
@@ -58,9 +57,11 @@ PlayerStatus HostPlayer::updateStatus(int gameValue, int clientValue) {
 
 	if (currStatus == Status_Alive && !hideCondition(diff)) {
 		newStatus = Status_Dead;
+		log_info(logPrefix() + "died");
 
-	} else if (currStatus == Status_Alive && resurrectCondition(diff)) {
+	} else if (currStatus == Status_Dead && resurrectCondition(diff)) {
 		newStatus = Status_Alive;
+		log_info(logPrefix() + "resurrected");
 	}
 
 	setStatus(newStatus);
@@ -73,4 +74,8 @@ bool HostPlayer::hideCondition(int diff) const {
 
 bool HostPlayer::resurrectCondition(int diff) const {
 	return diff <= ResurrectCondValue / m_controlBlock->playersCount();
+}
+
+std::string HostPlayer::logPrefix() const {
+	return "{Player " + std::to_string(id()) + "} ";
 }

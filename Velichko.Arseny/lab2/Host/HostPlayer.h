@@ -10,6 +10,7 @@ public:
 	void run() override;
 
 private:
+	std::string logPrefix() const;
 	PlayerStatus updateStatus(int gameValue, int clientValue);
 
 	SharedControlBlock m_controlBlock;
