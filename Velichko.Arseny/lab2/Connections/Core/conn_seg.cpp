@@ -17,11 +17,14 @@ ConnectionPrivate::ConnectionPrivate(Connection* conn) : m_conn(conn) {
 	}
 
 	int key = ftok(".", KeySeed + m_conn->id());
-	m_sharedBuffer = new SharedBuffer(key, DefaultBufferSize, flags);
+	m_sharedBuffer = new SharedBuffer(key, DefaultBufferSize);
+	m_sharedBuffer->open(flags);
 }
 
 ssize_t ConnectionPrivate::read(char* data, size_t size) {
-	m_sharedBuffer->waitForReadyRead(m_conn->timeout());
+	if (!m_sharedBuffer->waitForReadyRead(m_conn->timeout())) {
+		return -1;
+	}
 	return m_sharedBuffer->read(data, size);
 }
 
@@ -29,31 +32,25 @@ ssize_t ConnectionPrivate::write(const char* data, size_t size) {
 	return m_sharedBuffer->write(data, size);
 }
 
+bool ConnectionPrivate::isOpen() const {
+	return m_sharedBuffer->isOpen();
+}
+
 ConnectionPrivate::~ConnectionPrivate() {
 	if (m_conn->role() == Connection::Host) {
-		m_sharedBuffer->scheduleDestroy();
+		m_sharedBuffer->scheduleDelete();
 	}
 	delete m_sharedBuffer;
 }
 
-SharedBuffer::SharedBuffer(int key, size_t size, int flags) {
-	m_memId = shmget(key, size + sizeof(Header), flags);
-	auto segPtr = shmat(m_memId, nullptr, 0);
-
-	m_header = static_cast<Header*>(segPtr);
-	m_data = static_cast<char*>(segPtr) + sizeof(Header);
-	m_dataSize = loadSize();
-
-	if (!(flags & IPC_CREAT)) { return; }
-
-	initSharedMutex(&m_header->mutex);
-	initSharedCond(&m_header->cond);
-
-	m_header->pos = 0;
-	m_header->writerPid = -1;
-}
+SharedBuffer::SharedBuffer(int key, size_t size) : m_key(key), m_dataSize(size) {}
 
 ssize_t SharedBuffer::read(char* data, size_t size) {
+	if (!isOpen()) {
+		log_warning("Shared buffer wasn't opened");
+		return -1;
+	}
+
 	MutexLocker locker(&m_header->mutex);
 
 	size_t readSize = std::min(m_header->pos, size);
@@ -65,6 +62,11 @@ ssize_t SharedBuffer::read(char* data, size_t size) {
 }
 
 ssize_t SharedBuffer::write(const char* data, size_t size) {
+	if (!isOpen()) {
+		log_warning("Shared buffer wasn't opened");
+		return -1;
+	}
+
 	MutexLocker locker(&m_header->mutex);
 
 	size_t emptySize = m_dataSize - m_header->pos;
@@ -78,16 +80,21 @@ ssize_t SharedBuffer::write(const char* data, size_t size) {
 	return writeSize;
 }
 
-int SharedBuffer::waitForReadyRead(int timeout) {
+bool SharedBuffer::waitForReadyRead(int timeout) {
+	if (!isOpen()) {
+		log_warning("Shared buffer wasn't opened");
+		return false;
+	}
+
 	MutexLocker locker(&m_header->mutex);
 	pid_t pid = getpid();
 
 	timespec absTimeout = TimeUtils::absTimeout(timeout);
 	while (m_header->pos == 0 || m_header->writerPid == pid) {
 		int waitRes = pthread_cond_timedwait(&m_header->cond, &m_header->mutex, &absTimeout);
-		if (waitRes != 0) { return 0; }
+		if (waitRes != 0) { return false; }
 	}
-	return 1;
+	return true;
 }
 
 void SharedBuffer::initSharedMutex(pthread_mutex_t* mutex) {
@@ -104,17 +111,39 @@ void SharedBuffer::initSharedCond(pthread_cond_t* cond) {
 	pthread_cond_init(cond, &condAttr);
 }
 
-size_t SharedBuffer::loadSize() const {
-	shmid_ds buf = {};
-	shmctl(m_memId, IPC_STAT, &buf);
-	return buf.shm_segsz - sizeof(Header);
-}
-
 SharedBuffer::~SharedBuffer() {
-	shmdt(m_header);
+	SharedBuffer::close();
 }
 
-void SharedBuffer::scheduleDestroy() {
+bool SharedBuffer::open(int flags) {
+	m_memId = shmget(m_key, m_dataSize + sizeof(Header), flags);
+	if (m_memId == -1) {
+		log_errno("Allocation of shared memory failed");
+		return false;
+	}
+
+	auto segPtr = shmat(m_memId, nullptr, 0);
+	m_header = static_cast<Header*>(segPtr);
+	m_data = static_cast<char*>(segPtr) + sizeof(Header);
+
+	if (flags & IPC_CREAT) {
+		initSharedMutex(&m_header->mutex);
+		initSharedCond(&m_header->cond);
+
+		m_header->pos = 0;
+		m_header->writerPid = -1;
+	}
+	return IODevice::open(flags);
+}
+
+void SharedBuffer::close() {
+	if (!isOpen()) { return; }
+	shmdt(m_header);
+	IODevice::close();
+}
+
+void SharedBuffer::scheduleDelete() {
+	if (!isOpen()) { return; }
 	shmctl(m_memId, IPC_RMID, nullptr);
 }
 

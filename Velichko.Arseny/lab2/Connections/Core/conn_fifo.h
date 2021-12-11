@@ -3,13 +3,15 @@
 #include <string>
 
 #include "Connection.h"
-#include "IOStream.h"
+#include "IODevice.h"
 
-class File : public IOStream {
+class File : public IODevice {
 public:
-	void open(const std::string& path, int flags);
-	bool isOpened() const;
+	explicit File(const std::string& path);
+
+	bool open(int flags);
 	void close();
+
 	~File();
 
 	std::string path() const;
@@ -17,7 +19,7 @@ public:
 	ssize_t read(char *data, size_t size) override;
 	ssize_t write(const char *data, size_t size) override;
 
-	int waitForReadyRead(int timeout) override;
+	bool waitForReadyRead(int timeout) override;
 
 private:
 	std::string m_path;
@@ -33,11 +35,13 @@ public:
 	ssize_t read(char* data, size_t size);
 	ssize_t write(const char* data, size_t size);
 
+	bool isOpen() const;
+
 private:
 	static constexpr std::string_view HOST_FIFO_PREFIX = "fifo_host_";
 	static constexpr std::string_view CLIENT_FIFO_PREFIX = "fifo_client_";
 
 	Connection* m_conn;
-	File m_inFifo;
-	File m_outFifo;
+	File* m_inFifo;
+	File* m_outFifo;
 };

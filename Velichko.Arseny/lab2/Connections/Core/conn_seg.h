@@ -3,19 +3,22 @@
 #include <vector>
 
 #include "Connection.h"
-#include "IOStream.h"
+#include "IODevice.h"
 
-class SharedBuffer : public IOStream {
+class SharedBuffer : public IODevice {
 public:
-	SharedBuffer(int key, size_t size, int flags);
+	SharedBuffer(int key, size_t size);
 	~SharedBuffer();
-
-	void scheduleDestroy();
 
 	ssize_t read(char* data, size_t size) override;
 	ssize_t write(const char* data, size_t size) override;
 
-	int waitForReadyRead(int timeout) override;
+	bool waitForReadyRead(int timeout) override;
+
+	bool open(int flags) override;
+	void close() override;
+
+	void scheduleDelete();
 
 private:
 	struct Header {
@@ -28,12 +31,12 @@ private:
 	static void initSharedMutex(pthread_mutex_t* mutex);
 	static void initSharedCond(pthread_cond_t* cond);
 
-	size_t loadSize() const;
+	int m_key;
+	size_t m_dataSize;
 
+	int m_memId;
 	Header* m_header = nullptr;
 	char* m_data = nullptr;
-	size_t m_dataSize;
-	int m_memId;
 };
 
 class ConnectionPrivate {
@@ -43,6 +46,8 @@ public:
 
 	ssize_t read(char* data, size_t size);
 	ssize_t write(const char* data, size_t size);
+
+	bool isOpen() const;
 
 private:
 	static constexpr char KeySeed = 'G';

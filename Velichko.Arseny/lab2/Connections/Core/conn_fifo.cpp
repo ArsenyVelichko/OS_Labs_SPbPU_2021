@@ -5,6 +5,7 @@
 #include <stdexcept>
 
 #include "conn_fifo.h"
+#include "Logger.h"
 
 ConnectionPrivate::ConnectionPrivate(Connection* conn) : m_conn(conn) {
 	std::string idStr = std::to_string(conn->id());
@@ -18,51 +19,75 @@ ConnectionPrivate::ConnectionPrivate(Connection* conn) : m_conn(conn) {
 		std::swap(inFifoName, outFifoName);
 	}
 
-	m_inFifo.open(inFifoName, O_RDWR | O_NONBLOCK);
-	m_outFifo.open(outFifoName, O_RDWR | O_NONBLOCK);
+	m_inFifo = new File(inFifoName);
+	m_outFifo = new File(outFifoName);
+
+	m_inFifo->open(O_RDWR | O_NONBLOCK);
+	m_outFifo->open(O_RDWR | O_NONBLOCK);
 }
 
 ssize_t ConnectionPrivate::read(char* data, size_t size) {
-	m_inFifo.waitForReadyRead(m_conn->timeout());
-	return m_inFifo.read(data, size);
+	if (!m_inFifo->waitForReadyRead(m_conn->timeout())) {
+		return -1;
+	}
+	return m_inFifo->read(data, size);
 }
 
 ssize_t ConnectionPrivate::write(const char* data, size_t size) {
-	return m_outFifo.write(data, size);
+	return m_outFifo->write(data, size);
 }
 
-void File::open(const std::string& path, int flags) {
-	m_path = path;
-	m_fd = ::open(path.c_str(), flags);
-	m_isOpened = true;
+bool ConnectionPrivate::isOpen() const {
+	return m_inFifo->isOpen() && m_outFifo->isOpen();
 }
 
-bool File::isOpened() const {
-	return m_isOpened;
+File::File(const std::string& path) : m_path(path) {}
+
+bool File::open(int flags) {
+	m_fd = ::open(m_path.c_str(), flags);
+	if (m_fd == -1) {
+		log_errno("File open failed");
+		return false;
+	}
+	return IODevice::open(flags);
 }
 
 void File::close() {
-	if (m_isOpened) {
-		m_path = "";
-		::close(m_fd);
-	}
+	if (!isOpen()) { return; }
+	::close(m_fd);
+	IODevice::close();
 }
 
 File::~File() {
-	close();
+	File::close();
 }
 
 ssize_t File::read(char* data, size_t size) {
+	if (!isOpen()) {
+		log_warning("File wasn't opened");
+		return -1;
+	}
+
 	return ::read(m_fd, data, size);
 }
 
 ssize_t File::write(const char* data, size_t size) {
+	if (!isOpen()) {
+		log_warning("File wasn't opened");
+		return -1;
+	}
+
 	return ::write(m_fd, data, size);
 }
 
-int File::waitForReadyRead(int timeout) {
+bool File::waitForReadyRead(int timeout) {
+	if (!isOpen()) {
+		log_warning("File wasn't opened");
+		return false;
+	}
+
 	pollfd pollHandler = { m_fd, POLLIN };
-	return poll(&pollHandler, 1, timeout);
+	return poll(&pollHandler, 1, timeout) > 0;
 }
 
 std::string File::path() const {
@@ -71,7 +96,9 @@ std::string File::path() const {
 
 ConnectionPrivate::~ConnectionPrivate() {
 	if (m_conn->role() == Connection::Host) {
-		unlink(m_inFifo.path().c_str());
-		unlink(m_inFifo.path().c_str());
+		unlink(m_inFifo->path().c_str());
+		unlink(m_outFifo->path().c_str());
 	}
+	delete m_inFifo;
+	delete m_outFifo;
 }

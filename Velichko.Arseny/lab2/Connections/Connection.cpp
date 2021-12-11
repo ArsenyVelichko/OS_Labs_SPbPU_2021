@@ -32,4 +32,8 @@ Connection::Role Connection::role() const {
 	return m_role;
 }
 
+bool Connection::isOpen() const {
+	return pImpl()->isOpen();
+}
+
 Connection::~Connection() = default;

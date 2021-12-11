@@ -103,14 +103,21 @@ void GameEngine::waitTurn() {
 }
 
 int GameEngine::addPlayer() {
-	auto player = new HostPlayer(m_playerId, m_controlBlock);
+	HostPlayer* player;
+	try {
+		player = new HostPlayer(m_playerId, m_controlBlock);
 
-	if (m_gameThreadPool->start(player)) {
-		m_controlBlock->playerJoined();
-		return m_playerId++;
+	} catch (const std::exception& e) {
+		log_error(e.what());
+		return -1;
 	}
 
-	log_error("Failed to add new player");
-	return -1;
+	if (!m_gameThreadPool->start(player)) {
+		log_error("Failed to start new player");
+		return -1;
+	}
+
+	m_controlBlock->playerJoined();
+	return m_playerId++;
 }
 

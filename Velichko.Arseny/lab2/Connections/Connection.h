@@ -17,6 +17,7 @@ public:
 
 	int id() const;
 	int timeout() const;
+	bool isOpen() const;
 
 	Role role() const;
 

@@ -6,12 +6,12 @@
 #include <memory>
 
 #include "Connection.h"
-#include "IOStream.h"
+#include "IODevice.h"
 
-class UnixHostAddress {
+class UnixAddress {
 public:
-	UnixHostAddress() = default;
-	UnixHostAddress(const std::string& name);
+	UnixAddress() = default;
+	UnixAddress(const std::string& name);
 
 	bool isNull() const;
 
@@ -25,22 +25,25 @@ private:
 	std::shared_ptr<sockaddr_un> m_socketAddr;
 };
 
-class UdpSocket : public IOStream {
+class UdpSocket : public IODevice {
 public:
-	UdpSocket();
 	~UdpSocket();
 
-	void setHost(const UnixHostAddress& address);
+	void setHost(const UnixAddress& address);
 
-	int bind(const UnixHostAddress& address);
-	int waitForReadyRead(int timeout) override;
+	bool bind(const UnixAddress& address);
+	bool waitForReadyRead(int timeout) override;
 
 	ssize_t write(const char* data, size_t size) override;
 	ssize_t read(char* data, size_t size) override;
 
+	bool open(int flags = 0) override;
+	void close() override;
+
 private:
-	int m_socketFd;
-	UnixHostAddress m_hostAddress;
+	int m_socketFd = -1;
+	UnixAddress m_hostAddress;
+	UnixAddress m_bindAddress;
 };
 
 class ConnectionPrivate {
@@ -50,6 +53,8 @@ public:
 
 	ssize_t read(char* data, size_t size);
 	ssize_t write(const char* data, size_t size);
+
+	bool isOpen() const;
 
 private:
 	static constexpr std::string_view HOST_ADDR_PREFIX = "sock_host_";

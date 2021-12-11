@@ -3,7 +3,12 @@
 #include "Player.h"
 
 Player::Player(int id, int timeout, Connection::Role connRole) :
-	m_conn(new Connection(id, timeout, connRole)) {}
+	m_conn(new Connection(id, timeout, connRole)) {
+
+	if (!m_conn->isOpen()) {
+		throw std::runtime_error("Connection open failed");
+	}
+}
 
 int Player::id() const {
 	return m_conn->id();
@@ -15,10 +20,6 @@ PlayerStatus Player::status() const {
 
 void Player::setStatus(PlayerStatus status) {
 	m_status = status;
-}
-
-Player::~Player() {
-	delete m_conn;
 }
 
 void Player::writeMessage(const GameProto::Message& msg) {

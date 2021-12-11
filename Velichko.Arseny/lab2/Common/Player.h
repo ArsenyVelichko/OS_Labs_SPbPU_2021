@@ -11,7 +11,6 @@ using GameProto::PlayerStatus;
 class Player : public Runnable {
 public:
 	Player(int id, int timeout, Connection::Role connRole);
-	~Player() override;
 
 	int id() const;
 	PlayerStatus status() const;
@@ -23,6 +22,6 @@ protected:
 	void setStatus(PlayerStatus status);
 
 private:
-	Connection* m_conn;
+	std::unique_ptr<Connection> m_conn;
 	PlayerStatus m_status = GameProto::Status_Alive;
 };
