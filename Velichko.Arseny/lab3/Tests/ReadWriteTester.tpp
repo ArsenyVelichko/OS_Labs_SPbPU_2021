@@ -1,7 +1,5 @@
 #include "Writer.h"
 #include "Reader.h"
-#include "ReadWriteTester.h"
-
 
 template<template<class> class Container, class ValueType>
 ReadWriteTester<Container, ValueType>::ReadWriteTester() :
