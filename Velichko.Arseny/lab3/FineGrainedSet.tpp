@@ -57,6 +57,7 @@ bool FineGrainedSet<Key, Compare>::contains(const Key& key) const {
 	prev->unlock();
 	return contains;
 }
+
 template<class Key, class Compare>
 bool FineGrainedSet<Key, Compare>::empty() const {
 	return size() == 0;

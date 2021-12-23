@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <csignal>
 #include <cstring>
 
 #include "ThreadPool.h"
