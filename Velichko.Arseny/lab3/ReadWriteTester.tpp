@@ -1,5 +1,7 @@
 #include "Writer.h"
 #include "Reader.h"
+#include "ReadWriteTester.h"
+
 
 template<template<class> class Container, class ValueType>
 ReadWriteTester<Container, ValueType>::ReadWriteTester() :
@@ -60,4 +62,12 @@ const Container<ValueType>& ReadWriteTester<Container, ValueType>::container() c
 template<template<class> class Container, class ValueType>
 void ReadWriteTester<Container, ValueType>::waitForTestsEnd() {
 	m_threadPool->waitForDone();
+}
+
+template<template<class> class Container, class ValueType>
+void ReadWriteTester<Container, ValueType>::forwardData() {
+	for (const auto& val : m_data) {
+		m_container->insert(val);
+		m_mediator->put(val);
+	}
 }

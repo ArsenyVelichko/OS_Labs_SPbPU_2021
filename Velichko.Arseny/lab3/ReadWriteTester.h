@@ -12,6 +12,7 @@ public:
 	~ReadWriteTester();
 
 	void setData(const std::vector<ValueType>& data);
+	void forwardData();
 
 	void startWriters(uint32_t n = 1);
 	void startReaders(uint32_t n = 1);
