@@ -10,6 +10,8 @@ public:
 
 	void startWriters(const std::vector<ValueType>& data, const std::vector<size_t>& chunkSizes);
 
+	void waitForTestsEnd();
+
 	const Container<ValueType>& container() const;
 
 private:

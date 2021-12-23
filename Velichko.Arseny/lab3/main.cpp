@@ -23,6 +23,7 @@ void writersTestSuite() {
 	std::generate(chunkSizes.begin(), chunkSizes.end(), uniformStep);
 
 	tester.startWriters(data, chunkSizes);
+	tester.waitForTestsEnd();
 
 	const auto& container = tester.container();
 	for (int val : data) {

@@ -1,4 +1,6 @@
 #include "Writer.h"
+#include "ReadWriteTester.h"
+
 
 template<template<class> class Container, class ValueType>
 ReadWriteTester<Container, ValueType>::ReadWriteTester() :
@@ -29,4 +31,9 @@ void ReadWriteTester<Container, ValueType>::startWriters(const std::vector<Value
 template<template<class> class Container, class ValueType>
 const Container<ValueType>& ReadWriteTester<Container, ValueType>::container() const {
 	return *m_container;
+}
+
+template<template<class> class Container, class ValueType>
+void ReadWriteTester<Container, ValueType>::waitForTestsEnd() {
+	m_threadPool->waitForDone();
 }
