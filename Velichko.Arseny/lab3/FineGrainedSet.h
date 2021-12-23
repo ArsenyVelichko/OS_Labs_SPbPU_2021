@@ -17,6 +17,9 @@ public:
 	bool erase(const Key& key);
 	bool contains(const Key& key) const;
 
+	bool empty() const;
+	size_t size() const;
+
 private:
 	Compare m_comp;
 

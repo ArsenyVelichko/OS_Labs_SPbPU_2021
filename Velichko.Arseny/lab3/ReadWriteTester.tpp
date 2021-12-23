@@ -1,31 +1,55 @@
 #include "Writer.h"
-#include "ReadWriteTester.h"
-
+#include "Reader.h"
 
 template<template<class> class Container, class ValueType>
 ReadWriteTester<Container, ValueType>::ReadWriteTester() :
-	m_container(new Container<ValueType>), m_threadPool(new ThreadPool) {}
+	m_container(new Container<ValueType>),
+	m_threadPool(new ThreadPool),
+	m_mediator(new Mediator<ValueType>) {}
 
 template<template<class> class Container, class ValueType>
 ReadWriteTester<Container, ValueType>::~ReadWriteTester() {
 	delete m_container;
 	delete m_threadPool;
+	delete m_mediator;
 }
 
 template<template<class> class Container, class ValueType>
-void ReadWriteTester<Container, ValueType>::startWriters(const std::vector<ValueType>& data,
-														 const std::vector<size_t>& chunkSizes) {
-	auto chunkBegin = data.begin();
-	for (int i = 0; chunkBegin < data.end() && i < chunkSizes.size(); i++) {
-		auto chunkEnd = std::min(chunkBegin + chunkSizes[i], data.end());
+void ReadWriteTester<Container, ValueType>::setData(const std::vector<ValueType>& data) {
+	m_data = data;
+}
+
+template<template<class> class Container, class ValueType>
+void ReadWriteTester<Container, ValueType>::startWorkers(uint32_t n, const WorkerCtor& workerCtor) {
+	size_t chunkSize = (m_data.size() + n - 1) / n;
+
+	auto chunkBegin = m_data.begin();
+	for (int i = 0; i < n; i++) {
+		auto chunkEnd = std::min(chunkBegin + chunkSize, m_data.end());
 		std::vector<ValueType> chunk(chunkBegin, chunkEnd);
 
-		auto writer = new Writer<Container, ValueType>(m_container);
-		writer->setDataToWrite(chunk);
-		m_threadPool->start(writer);
+		auto worker = workerCtor();
+		worker->setData(chunk);
+		worker->setMediator(m_mediator);
+
+		m_threadPool->start(worker);
 
 		chunkBegin = chunkEnd;
 	}
+}
+
+template<template<class> class Container, class ValueType>
+void ReadWriteTester<Container, ValueType>::startWriters(uint32_t n) {
+	startWorkers(n, [this] {
+		return new Writer<Container, ValueType>(m_container);
+	});
+}
+
+template<template<class> class Container, class ValueType>
+void ReadWriteTester<Container, ValueType>::startReaders(uint32_t n) {
+	startWorkers(n, [this] {
+		return new Reader<Container,ValueType>(ReaderTimeout, m_container);
+	});
 }
 
 template<template<class> class Container, class ValueType>

@@ -6,9 +6,9 @@
 #include "Mediator.h"
 
 template<template<class> class Container, class ValueType>
-class Writer : public Worker<ValueType> {
+class Reader : public Worker<ValueType> {
 public:
-	explicit Writer(Container<ValueType>* container);
+	Reader(int timeout, Container<ValueType>* container);
 
 	void setData(const std::vector<ValueType>& data) override;
 	void setMediator(Mediator<ValueType>* mediator) override;
@@ -16,6 +16,8 @@ public:
 	void run() override;
 
 private:
+	int m_timeout;
+
 	Container<ValueType>* m_container;
 	Mediator<ValueType>* m_mediator = nullptr;
 	std::vector<ValueType> m_data;
@@ -23,4 +25,4 @@ private:
 	pthread_mutex_t m_mutex = PTHREAD_MUTEX_INITIALIZER;
 };
 
-#include "Writer.tpp"
+#include "Reader.tpp"

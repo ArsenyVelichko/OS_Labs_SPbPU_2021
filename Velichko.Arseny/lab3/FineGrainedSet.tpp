@@ -1,6 +1,3 @@
-
-#include "FineGrainedSet.h"
-
 template<class Key, class Compare>
 FineGrainedSet<Key, Compare>::FineGrainedSet() : m_comp(Compare()) {}
 
@@ -59,6 +56,15 @@ bool FineGrainedSet<Key, Compare>::contains(const Key& key) const {
 	bool contains = (prev->m_next != nullptr);
 	prev->unlock();
 	return contains;
+}
+template<class Key, class Compare>
+bool FineGrainedSet<Key, Compare>::empty() const {
+	return size() == 0;
+}
+
+template<class Key, class Compare>
+size_t FineGrainedSet<Key, Compare>::size() const {
+	return m_head.m_size;
 }
 
 template<class Key, class Compare>
